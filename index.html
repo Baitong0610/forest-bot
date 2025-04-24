@@ -1,95 +1,111 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>เลือกที่นั่งของคุณ</title>
   <style>
     body {
-      font-family: 'Sarabun', sans-serif;
-      background-color: #e7f0df;
+      font-family: sans-serif;
+      background-color: #e5f0df;
       text-align: center;
-      padding: 20px;
     }
-
-    h2 {
-      color: #2d9300;
-    }
-
-    .seat-map-container {
+    .seat-map {
       position: relative;
-      width: 100%;
-      max-width: 360px;
-      margin: 0 auto;
+      display: inline-block;
     }
-
-    .seat-map-container img {
-      width: 100%;
-      height: auto;
-      display: block;
+    .seat-map img {
+      width: 350px;
     }
-
-    .seat-btn {
+    .seat-button {
       position: absolute;
-      transform: translate(-50%, -50%);
-      padding: 4px 10px;
-      background-color: #f0f0f0;
-      border: 2px solid #555;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .button-group {
-      margin-top: 20px;
-    }
-
-    .confirm-btn, .reset-btn {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 0 10px;
-      border: none;
-      border-radius: 8px;
+      width: 35px;
+      height: 30px;
+      background-color: #d1e7dd;
+      border: 1px solid #6c757d;
+      border-radius: 5px;
       cursor: pointer;
     }
-
-    .confirm-btn {
-      background-color: #2d9300;
+    .seat-button.selected {
+      background-color: #198754;
       color: white;
     }
-
-    .reset-btn {
-      background-color: #aaa;
+    .seat-button.taken {
+      background-color: #6c757d;
+      color: white;
+      cursor: not-allowed;
+    }
+    #confirm, #reset {
+      margin: 15px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+    #confirm {
+      background-color: #198754;
+      color: white;
+    }
+    #reset {
+      background-color: #6c757d;
       color: white;
     }
   </style>
 </head>
 <body>
-
   <h2>เลือกที่นั่งของคุณ</h2>
   <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
+  <div class="seat-map">
+    <img src="resized-bus-seat-map.png" alt="seat-map" />
+    
+    <!-- ปรับตำแหน่งให้ตรงภาพล่าสุด -->
+    <button class="seat-button" style="top:50px; left:260px;">A1</button>
+    <button class="seat-button" style="top:50px; left:210px;">A2</button>
+    <button class="seat-button" style="top:50px; left:160px;">A3</button>
+    
+    <button class="seat-button" style="top:115px; left:160px;">A4</button>
+    <button class="seat-button" style="top:115px; left:210px;">A5</button>
+    <button class="seat-button" style="top:115px; left:260px;">A6</button>
 
-  <div class="seat-map-container">
-    <img src="resized-bus-seat-map.png" alt="seat map">
-
-    <!-- ปุ่มเลือกที่นั่ง A1-A9 -->
-    <button class="seat-btn" style="top: 17%; left: 79%;">A1</button>
-    <button class="seat-btn" style="top: 17%; left: 67%;">A2</button>
-    <button class="seat-btn" style="top: 17%; left: 55%;">A3</button>
-
-    <button class="seat-btn" style="top: 33.5%; left: 61%;">A4</button>
-    <button class="seat-btn" style="top: 33.5%; left: 73%;">A5</button>
-    <button class="seat-btn" style="top: 33.5%; left: 85%;">A6</button>
-
-    <button class="seat-btn" style="top: 62.5%; left: 85%;">A7</button>
-    <button class="seat-btn" style="top: 62.5%; left: 73%;">A8</button>
-    <button class="seat-btn" style="top: 62.5%; left: 61%;">A9</button>
+    <button class="seat-button" style="top:185px; left:260px;">A7</button>
+    <button class="seat-button" style="top:185px; left:210px;">A8</button>
+    <button class="seat-button" style="top:185px; left:160px;">A9</button>
   </div>
 
-  <div class="button-group">
-    <button class="confirm-btn">ยืนยันการจอง</button>
-    <button class="reset-btn">รีเซ็ต</button>
+  <div style="margin-top: 20px;">
+    <button id="confirm">ยืนยันการจอง</button>
+    <button id="reset">รีเซ็ต</button>
   </div>
 
+  <script>
+    const seats = document.querySelectorAll('.seat-button');
+    seats.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!btn.classList.contains('taken')) {
+          btn.classList.toggle('selected');
+        }
+      });
+    });
+
+    document.getElementById('reset').addEventListener('click', () => {
+      seats.forEach(btn => btn.classList.remove('selected'));
+    });
+
+    document.getElementById('confirm').addEventListener('click', () => {
+      const selected = Array.from(seats)
+        .filter(btn => btn.classList.contains('selected'))
+        .map(btn => btn.innerText);
+      if (selected.length === 0) {
+        alert('กรุณาเลือกที่นั่งก่อน');
+      } else {
+        const name = prompt("กรุณากรอกชื่อผู้จอง:");
+        if (name) {
+          alert(`จองที่นั่ง ${selected.join(', ')} ให้คุณ ${name} เรียบร้อยแล้ว`);
+          // ที่นี่ไว้ต่อกับ Google Sheets ได้ภายหลัง
+        }
+      }
+    });
+  </script>
 </body>
 </html>
