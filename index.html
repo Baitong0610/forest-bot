@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จองที่นั่งทริปเดินป่า</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    .seat {
+      display: inline-block;
+      width: 60px;
+      height: 60px;
+      margin: 10px;
+      background-color: #eee;
+      border-radius: 8px;
+      line-height: 60px;
+      cursor: pointer;
+      border: 2px solid #ccc;
+    }
+    .seat.selected {
+      background-color: #7bd77b;
+      border-color: #4caf50;
+    }
+  </style>
+</head>
+<body>
+  <h1>เลือกที่นั่ง</h1>
+  <div id="seats"></div>
+
+  <script>
+    const seatIds = ["A1","A2","A3","A4","A5","A6","A7","A8","A9"];
+    const seatsDiv = document.getElementById("seats");
+
+    seatIds.forEach(id => {
+      const btn = document.createElement("div");
+      btn.className = "seat";
+      btn.textContent = id;
+      btn.onclick = () => {
+        btn.classList.toggle("selected");
+        alert("เลือกที่นั่ง: " + id + " (ระบบยังไม่เชื่อม Google Sheet)");
+      };
+      seatsDiv.appendChild(btn);
+    });
+  </script>
+</body>
+</html>
+"เพิ่มหน้าเว็บเลือกที่นั่ง"
