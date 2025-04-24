@@ -59,18 +59,18 @@
   <div class="seat-map">
     <img src="resized-bus-seat-map.png" alt="seat-map" />
     
-    <!-- ปรับตำแหน่งให้ตรงภาพล่าสุด -->
-    <button class="seat-button" style="top:50px; left:260px;">A1</button>
-    <button class="seat-button" style="top:50px; left:210px;">A2</button>
-    <button class="seat-button" style="top:50px; left:160px;">A3</button>
-    
-    <button class="seat-button" style="top:115px; left:160px;">A4</button>
-    <button class="seat-button" style="top:115px; left:210px;">A5</button>
-    <button class="seat-button" style="top:115px; left:260px;">A6</button>
+    <!-- ปรับให้ตรงกับภาพใหม่ -->
+    <button class="seat-button" style="top: 42px; left: 275px;">A1</button>
+    <button class="seat-button" style="top: 42px; left: 230px;">A2</button>
+    <button class="seat-button" style="top: 42px; left: 185px;">A3</button>
 
-    <button class="seat-button" style="top:185px; left:260px;">A7</button>
-    <button class="seat-button" style="top:185px; left:210px;">A8</button>
-    <button class="seat-button" style="top:185px; left:160px;">A9</button>
+    <button class="seat-button" style="top: 108px; left: 190px;">A4</button>
+    <button class="seat-button" style="top: 108px; left: 235px;">A5</button>
+    <button class="seat-button" style="top: 108px; left: 280px;">A6</button>
+
+    <button class="seat-button" style="top: 208px; left: 280px;">A7</button>
+    <button class="seat-button" style="top: 208px; left: 235px;">A8</button>
+    <button class="seat-button" style="top: 208px; left: 190px;">A9</button>
   </div>
 
   <div style="margin-top: 20px;">
@@ -102,7 +102,7 @@
         const name = prompt("กรุณากรอกชื่อผู้จอง:");
         if (name) {
           alert(`จองที่นั่ง ${selected.join(', ')} ให้คุณ ${name} เรียบร้อยแล้ว`);
-          // ที่นี่ไว้ต่อกับ Google Sheets ได้ภายหลัง
+          // เพิ่มเชื่อม Google Sheets ที่นี่ได้ภายหลัง
         }
       }
     });
