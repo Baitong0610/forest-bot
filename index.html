@@ -2,89 +2,95 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เลือกที่นั่ง Forrest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>เลือกที่นั่ง</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
-      margin: 0;
-      padding: 0;
       background-color: #f0f0e9;
       text-align: center;
+      margin: 0;
+      padding: 0;
     }
+
     h1 {
-      margin-top: 2rem;
-      font-size: 2rem;
+      margin-top: 30px;
+      color: #222;
     }
+
     p {
-      margin-bottom: 1rem;
+      margin-top: -10px;
+      font-weight: bold;
+      color: #444;
     }
-    .container {
+
+    .seat-map {
+      background-image: url("resized-bus-seat-map.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      width: 400px;
+      height: 900px;
       position: relative;
-      width: 320px;
-      margin: 0 auto;
+      margin: 30px auto 10px auto; /* ลด margin ล่างเหลือ 10px */
+      border-radius: 10px;
     }
-    .bus-image {
-      width: 100%;
-    }
+
     .seat-button {
       position: absolute;
       width: 50px;
       height: 30px;
-      background-color: #b0eacd;
+      background-color: #b5e48c;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      font-weight: bold;
+      transition: 0.2s;
     }
+
     .seat-button:hover {
-      background-color: #9cd5b6;
+      transform: scale(1.1);
     }
-    .seat-button:active {
-      transform: scale(0.95);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+
+    .seat-button.selected {
+      background-color: #52b788;
+      color: white;
     }
-    .action-buttons {
-      margin-top: -200px;
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
+
+    .seat-button.taken {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
-    .action-buttons button {
-      font-family: 'Noto Sans Thai', sans-serif;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
+
+    .button-container {
+      margin-top:-200px; 
+    }
+
+    .confirm-btn, .reset-btn {
+      padding: 10px 20px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
+      margin: 0 10px;
+      font-weight: bold;
       cursor: pointer;
-      transition: transform 0.1s ease;
     }
-    .action-buttons button:active {
-      transform: scale(0.95);
-    }
-    .confirm {
-      background-color: #4CAF50;
+
+    .confirm-btn {
+      background-color: #52b788;
       color: white;
     }
-    .reset {
-      background-color: #555;
+
+    .reset-btn {
+      background-color: #6c757d;
       color: white;
-    }
-    .mascot {
-      margin-top: 2rem;
-    }
-    .mascot img {
-      width: 80px;
     }
   </style>
 </head>
 <body>
   <h1>เลือกที่นั่งของคุณ</h1>
   <p>กดเลือกที่นั่งเพื่อทำการจอง</p>
-  <div class="container">
-    <img src="resized-bus-seat-map.png" alt="seat map" class="bus-image">
-    <!-- ตัวอย่างตำแหน่งที่นั่ง -->
+
+  <div class="seat-map">
     <button class="seat-button" style="top: 233px; left: 100px;" id="A1">A1</button>
     <button class="seat-button" style="top: 233px; left: 180px;" id="A2">A2</button>
     <button class="seat-button" style="top: 233px; left: 260px;" id="A3">A3</button>
@@ -95,13 +101,47 @@
     <button class="seat-button" style="top: 505px; left: 180px;" id="A8">A8</button>
     <button class="seat-button" style="top: 505px; left: 95px;" id="A9">A9</button>
   </div>
-  <div class="action-buttons">
-    <button class="confirm">✅ ยืนยันการจอง</button>
-    <button class="reset">รีเซ็ต</button>
+
+  <div class="button-container">
+    <button class="confirm-btn" onclick="confirmBooking()">ยืนยันการจอง</button>
+    <button class="reset-btn" onclick="resetSelection()">รีเซ็ต</button>
   </div>
-  <div class="mascot">
-    <p>น้อง Forrest 🦦 มาช่วยดูแลการจองของคุณ!</p>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Otter_%28cropped%29.jpg/512px-Otter_%28cropped%29.jpg" alt="น้อง Forrest">
-  </div>
+
+  <script>
+    const seatButtons = document.querySelectorAll('.seat-button');
+
+    seatButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!btn.classList.contains('taken')) {
+          btn.classList.toggle('selected');
+        }
+      });
+    });
+
+    function confirmBooking() {
+      const selected = document.querySelectorAll('.seat-button.selected');
+      if (selected.length === 0) {
+        alert('กรุณาเลือกที่นั่งก่อน');
+        return;
+      }
+
+      const name = prompt("กรุณาใส่ชื่อของคุณ:");
+      if (!name) return;
+
+      selected.forEach(btn => {
+        btn.textContent = name;
+        btn.classList.remove('selected');
+        btn.classList.add('taken');
+      });
+    }
+
+    function resetSelection() {
+      seatButtons.forEach(btn => {
+        if (!btn.classList.contains('taken')) {
+          btn.classList.remove('selected');
+        }
+      });
+    }
+  </script>
 </body>
 </html>
