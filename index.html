@@ -23,6 +23,7 @@
       #seat-map img {
         width: 100%;
         height: auto;
+        display: block;
       }
       .seat-button {
         position: absolute;
@@ -32,6 +33,7 @@
         border: none;
         cursor: pointer;
         font-weight: bold;
+        transform: translate(-50%, -50%);
       }
       #buttons {
         margin-top: 20px;
@@ -57,14 +59,19 @@
   <body>
     <h1>เลือกที่นั่งของคุณ</h1>
     <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
-    <div id="seat-map">
-      <img src="1461fb79-2286-44a8-8142-14857cbe57a5.png" alt="seat map" />
-      <!-- ปุ่มที่นั่ง (ปรับแล้ว) -->
-<button class="seat-button" style="left:668px; top:161px;">A1</button>
-<button class="seat-button" style="left:590px; top:161px;">A2</button>
-<button class="seat-button" style="left:512px; top:161px;">A3</button>
 
-</div>
+    <div id="seat-map">
+      <img src="resized-bus-seat-map.png" alt="seat map" />
+      <button class="seat-button" style="left:278.2px; top:67.1px;" onclick="selectSeat('A1')">A1</button>
+      <button class="seat-button" style="left:245.7px; top:67.1px;" onclick="selectSeat('A2')">A2</button>
+      <button class="seat-button" style="left:213.3px; top:67.1px;" onclick="selectSeat('A3')">A3</button>
+      <button class="seat-button" style="left:278.2px; top:165.9px;" onclick="selectSeat('A4')">A4</button>
+      <button class="seat-button" style="left:245.7px; top:165.9px;" onclick="selectSeat('A5')">A5</button>
+      <button class="seat-button" style="left:213.3px; top:165.9px;" onclick="selectSeat('A6')">A6</button>
+      <button class="seat-button" style="left:278.2px; top:264.6px;" onclick="selectSeat('A7')">A7</button>
+      <button class="seat-button" style="left:245.7px; top:264.6px;" onclick="selectSeat('A8')">A8</button>
+      <button class="seat-button" style="left:213.3px; top:264.6px;" onclick="selectSeat('A9')">A9</button>
+    </div>
 
     <div id="buttons">
       <button id="submitBtn" onclick="submitSelection()">ยืนยันการจอง</button>
@@ -90,7 +97,7 @@
         const name = prompt(`กรุณากรอกชื่อเพื่อจองที่นั่ง ${selectedSeat}:`);
         if (name) {
           alert(`ขอบคุณ ${name} ที่จองที่นั่ง ${selectedSeat}`);
-          // เพิ่มฟังก์ชันเชื่อม Google Sheets ที่นี่
+          // ที่นี่สามารถเพิ่มโค้ดเชื่อมกับ Google Sheets ได้ในอนาคต
         }
       }
 
