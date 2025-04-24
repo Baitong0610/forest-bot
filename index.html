@@ -1,58 +1,59 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>เลือกที่นั่งกับ Forrest</title>
   <style>
     body {
       font-family: sans-serif;
+      background-color: #e8f5e9;
       text-align: center;
-      background-color: #edf7f3;
-      margin: 0;
-      padding: 0;
+      padding: 20px;
     }
 
     h2 {
-      margin-top: 20px;
-      color: #206c42;
+      color: #2e7d32;
     }
 
     .seating-container {
       position: relative;
       width: 360px;
       height: 640px;
-      margin: 20px auto;
-      background: url('bus-seat-map.png') no-repeat center/contain;
+      margin: 0 auto;
+      background: url('bus-map.png') no-repeat center/contain;
     }
 
     .seat {
       position: absolute;
       width: 50px;
-      height: 50px;
+      height: 40px;
       background-color: #ffffffcc;
       border: 1px solid #aaa;
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
+      text-align: center;
+      padding-top: 6px;
+      transition: background-color 0.2s;
     }
 
     .seat:hover {
-      background-color: #d1e7dd;
+      background-color: #c8e6c9;
     }
 
-    /* ปรับให้เรียง 3 ที่นั่งต่อแถว */
-    #A3 { top: 105px; left: 55px; }
-    #A2 { top: 105px; left: 145px; }
-    #A1 { top: 105px; left: 235px; }
+    /* ตำแหน่งปุ่มให้ตรงภาพ */
+    #A1 { top: 78px; left: 255px; }
+    #A2 { top: 78px; left: 180px; }
+    #A3 { top: 78px; left: 105px; }
 
-    #A6 { top: 185px; left: 55px; }
-    #A5 { top: 185px; left: 145px; }
-    #A4 { top: 185px; left: 235px; }
+    #A4 { top: 158px; left: 255px; }
+    #A5 { top: 158px; left: 180px; }
+    #A6 { top: 158px; left: 105px; }
 
-    #A9 { top: 265px; left: 55px; }
-    #A8 { top: 265px; left: 145px; }
-    #A7 { top: 265px; left: 235px; }
+    #A7 { top: 238px; left: 255px; }
+    #A8 { top: 238px; left: 180px; }
+    #A9 { top: 238px; left: 105px; }
   </style>
 </head>
 <body>
@@ -71,6 +72,17 @@
     <button class="seat" id="A9">A9</button>
   </div>
 
-  <script src="index.js"></script>
+  <script>
+    document.querySelectorAll('.seat').forEach(button => {
+      button.addEventListener('click', () => {
+        const name = prompt("กรุณากรอกชื่อผู้จอง:");
+        if (name) {
+          button.textContent = name;
+          button.disabled = true;
+          button.style.backgroundColor = "#a5d6a7";
+        }
+      });
+    });
+  </script>
 </body>
 </html>
