@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>เลือกที่นั่ง</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
+
     body {
       font-family: 'Kanit', sans-serif;
       background-color: #f1f1e6;
@@ -19,7 +21,7 @@
     }
 
     .seat-map {
-      background-image: url("resized-bus-seat-map.png");
+      background-image: url("resized-bus-seat-map.png"); /* รูปต้องอยู่โฟลเดอร์เดียวกับ HTML */
       background-size: 100% 100%;
       background-repeat: no-repeat;
       width: 500px;
@@ -27,6 +29,7 @@
       position: relative;
       margin: 30px auto;
       border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
 
     .seat-button {
@@ -38,6 +41,7 @@
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      font-size: 16px;
     }
 
     .seat-button.selected {
@@ -60,6 +64,7 @@
       border-radius: 6px;
       margin: 0 10px;
       font-weight: bold;
+      font-size: 16px;
       cursor: pointer;
     }
 
