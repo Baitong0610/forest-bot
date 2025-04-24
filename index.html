@@ -3,59 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>เลือกที่นั่งของคุณ</title>
+  <title>เลือกที่นั่ง</title>
   <style>
     body {
-      font-family: 'Prompt', sans-serif;
+      font-family: sans-serif;
       text-align: center;
-      background-color: #eef1e6;
-      margin: 0;
-      padding: 20px;
+      background-color: #f0f1e8;
     }
-
-    #seat-map {
+    h1 {
+      margin-top: 30px;
+    }
+    .bus-container {
       position: relative;
-      width: 320px;
+      width: 360px;
       margin: 0 auto;
+      background-image: url("05c51569-c070-4005-8535-97e298e02fd4.png");
+      background-size: cover;
+      height: 760px;
     }
-
-    #seat-map img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
     .seat-button {
       position: absolute;
-      padding: 5px 10px;
-      border-radius: 10px;
-      background-color: #7ed957;
+      background-color: #8fdb69;
       border: none;
+      border-radius: 8px;
+      padding: 5px 10px;
       cursor: pointer;
-      font-weight: bold;
-      font-size: 0.9em;
     }
-
-    #buttons {
+    .controls {
       margin-top: 20px;
     }
-
-    #buttons button {
+    .confirm-button, .reset-button {
       padding: 10px 20px;
-      font-size: 1em;
-      border-radius: 10px;
+      font-size: 16px;
+      margin: 10px;
       border: none;
-      margin: 0 10px;
+      border-radius: 8px;
       cursor: pointer;
     }
-
-    #submitBtn {
-      background-color: #4caf50;
+    .confirm-button {
+      background-color: #2f9e44;
       color: white;
     }
-
-    #resetBtn {
-      background-color: #666;
+    .reset-button {
+      background-color: #6c757d;
       color: white;
     }
   </style>
@@ -64,56 +54,22 @@
   <h1>เลือกที่นั่งของคุณ</h1>
   <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
 
-  <div id="seat-map">
-    <img src="resized-bus-seat-map.png" alt="seat map" />
-
-    <button class="seat-button" style="left: 245px; top: 112px;" onclick="selectSeat('A1')">A1</button>
-<button class="seat-button" style="left: 175px; top: 112px;" onclick="selectSeat('A2')">A2</button>
-<button class="seat-button" style="left: 105px; top: 112px;" onclick="selectSeat('A3')">A3</button>
-
-<button class="seat-button" style="left: 245px; top: 198px;" onclick="selectSeat('A4')">A4</button>
-<button class="seat-button" style="left: 175px; top: 198px;" onclick="selectSeat('A5')">A5</button>
-<button class="seat-button" style="left: 105px; top: 198px;" onclick="selectSeat('A6')">A6</button>
-
-<button class="seat-button" style="left: 245px; top: 284px;" onclick="selectSeat('A7')">A7</button>
-<button class="seat-button" style="left: 175px; top: 284px;" onclick="selectSeat('A8')">A8</button>
-<button class="seat-button" style="left: 105px; top: 284px;" onclick="selectSeat('A9')">A9</button>
+  <div class="bus-container">
+    <button class="seat-button" style="top: 55px; left: 60px;">Staff</button>
+    <button class="seat-button" style="top: 55px; left: 160px;">A3</button>
+    <button class="seat-button" style="top: 55px; left: 225px;">A2</button>
+    <button class="seat-button" style="top: 55px; left: 290px;">A1</button>
+    <button class="seat-button" style="top: 160px; left: 290px;">A4</button>
+    <button class="seat-button" style="top: 200px; left: 290px;">A5</button>
+    <button class="seat-button" style="top: 240px; left: 290px;">A6</button>
+    <button class="seat-button" style="top: 320px; left: 290px;">A7</button>
+    <button class="seat-button" style="top: 360px; left: 290px;">A8</button>
+    <button class="seat-button" style="top: 400px; left: 290px;">A9</button>
   </div>
 
-  <div id="buttons">
-    <button id="submitBtn" onclick="submitSelection()">ยืนยันการจอง</button>
-    <button id="resetBtn" onclick="resetSelection()">รีเซ็ต</button>
+  <div class="controls">
+    <button class="confirm-button">ยืนยันการจอง</button>
+    <button class="reset-button">รีเซ็ต</button>
   </div>
-
-  <script>
-    let selectedSeat = null;
-
-    function selectSeat(seat) {
-      if (selectedSeat) {
-        document.querySelector(`button[onclick="selectSeat('${selectedSeat}')"]`).style.backgroundColor = '#7ed957';
-      }
-      selectedSeat = seat;
-      document.querySelector(`button[onclick="selectSeat('${seat}')"]`).style.backgroundColor = '#ff9800';
-    }
-
-    function submitSelection() {
-      if (!selectedSeat) {
-        alert('กรุณาเลือกที่นั่งก่อน');
-        return;
-      }
-      const name = prompt(`กรุณากรอกชื่อเพื่อจองที่นั่ง ${selectedSeat}:`);
-      if (name) {
-        alert(`ขอบคุณ ${name} ที่จองที่นั่ง ${selectedSeat}`);
-        // ที่นี่สามารถเพิ่มโค้ดส่งข้อมูลไป Google Sheets ได้
-      }
-    }
-
-    function resetSelection() {
-      if (selectedSeat) {
-        document.querySelector(`button[onclick="selectSeat('${selectedSeat}')"]`).style.backgroundColor = '#7ed957';
-        selectedSeat = null;
-      }
-    }
-  </script>
 </body>
 </html>
