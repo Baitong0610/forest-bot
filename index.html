@@ -1,112 +1,112 @@
 <!DOCTYPE html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>เลือกที่นั่งของคุณ</title>
-    <style>
-      body {
-        font-family: 'Prompt', sans-serif;
-        text-align: center;
-        background-color: #eef1e6;
-        margin: 0;
-        padding: 20px;
-      }
-      h1 {
-        margin-bottom: 0.2em;
-      }
-      #seat-map {
-        position: relative;
-        width: 320px;
-        margin: 0 auto;
-      }
-      #seat-map img {
-        width: 100%;
-        height: auto;
-        display: block;
-      }
-      .seat-button {
-        position: absolute;
-        padding: 5px 10px;
-        border-radius: 10px;
-        background-color: #7ed957;
-        border: none;
-        cursor: pointer;
-        font-weight: bold;
-        transform: translate(-50%, -50%);
-      }
-      #buttons {
-        margin-top: 20px;
-      }
-      #buttons button {
-        padding: 10px 20px;
-        font-size: 1em;
-        border-radius: 10px;
-        border: none;
-        margin: 0 10px;
-        cursor: pointer;
-      }
-      #submitBtn {
-        background-color: #4caf50;
-        color: white;
-      }
-      #resetBtn {
-        background-color: #666;
-        color: white;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>เลือกที่นั่งของคุณ</h1>
-    <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>เลือกที่นั่งของคุณ</title>
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      text-align: center;
+      background-color: #eef1e6;
+      margin: 0;
+      padding: 20px;
+    }
 
-    <div id="seat-map">
-      <img src="resized-bus-seat-map.png" alt="seat map" />
-      <button class="seat-button" style="left:278.2px; top:67.1px;" onclick="selectSeat('A1')">A1</button>
-      <button class="seat-button" style="left:245.7px; top:67.1px;" onclick="selectSeat('A2')">A2</button>
-      <button class="seat-button" style="left:213.3px; top:67.1px;" onclick="selectSeat('A3')">A3</button>
-      <button class="seat-button" style="left:278.2px; top:165.9px;" onclick="selectSeat('A4')">A4</button>
-      <button class="seat-button" style="left:245.7px; top:165.9px;" onclick="selectSeat('A5')">A5</button>
-      <button class="seat-button" style="left:213.3px; top:165.9px;" onclick="selectSeat('A6')">A6</button>
-      <button class="seat-button" style="left:278.2px; top:264.6px;" onclick="selectSeat('A7')">A7</button>
-      <button class="seat-button" style="left:245.7px; top:264.6px;" onclick="selectSeat('A8')">A8</button>
-      <button class="seat-button" style="left:213.3px; top:264.6px;" onclick="selectSeat('A9')">A9</button>
-    </div>
+    #seat-map {
+      position: relative;
+      width: 320px;
+      margin: 0 auto;
+    }
 
-    <div id="buttons">
-      <button id="submitBtn" onclick="submitSelection()">ยืนยันการจอง</button>
-      <button id="resetBtn" onclick="resetSelection()">รีเซ็ต</button>
-    </div>
+    #seat-map img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
 
-    <script>
-      let selectedSeat = null;
+    .seat-button {
+      position: absolute;
+      padding: 5px 10px;
+      border-radius: 10px;
+      background-color: #7ed957;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
 
-      function selectSeat(seat) {
-        if (selectedSeat) {
-          document.querySelector(`button[onclick="selectSeat('${selectedSeat}')"]`).style.backgroundColor = '#7ed957';
-        }
-        selectedSeat = seat;
-        document.querySelector(`button[onclick="selectSeat('${seat}')"]`).style.backgroundColor = '#ff9800';
+    #buttons {
+      margin-top: 20px;
+    }
+
+    #buttons button {
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 10px;
+      border: none;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+
+    #submitBtn {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    #resetBtn {
+      background-color: #666;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>เลือกที่นั่งของคุณ</h1>
+  <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
+
+  <div id="seat-map">
+    <img src="resized-bus-seat-map.png" alt="seat map" />
+
+    <!-- ตัวอย่างปุ่มที่นั่ง A1-A3 -->
+    <button class="seat-button" style="left: 245px; top: 65px;" onclick="selectSeat('A1')">A1</button>
+    <button class="seat-button" style="left: 175px; top: 65px;" onclick="selectSeat('A2')">A2</button>
+    <button class="seat-button" style="left: 105px; top: 65px;" onclick="selectSeat('A3')">A3</button>
+  </div>
+
+  <div id="buttons">
+    <button id="submitBtn" onclick="submitSelection()">ยืนยันการจอง</button>
+    <button id="resetBtn" onclick="resetSelection()">รีเซ็ต</button>
+  </div>
+
+  <script>
+    let selectedSeat = null;
+
+    function selectSeat(seat) {
+      if (selectedSeat) {
+        document.querySelector(`button[onclick="selectSeat('${selectedSeat}')"]`).style.backgroundColor = '#7ed957';
       }
+      selectedSeat = seat;
+      document.querySelector(`button[onclick="selectSeat('${seat}')"]`).style.backgroundColor = '#ff9800';
+    }
 
-      function submitSelection() {
-        if (!selectedSeat) {
-          alert('กรุณาเลือกที่นั่งก่อน');
-          return;
-        }
-        const name = prompt(`กรุณากรอกชื่อเพื่อจองที่นั่ง ${selectedSeat}:`);
-        if (name) {
-          alert(`ขอบคุณ ${name} ที่จองที่นั่ง ${selectedSeat}`);
-          // ที่นี่สามารถเพิ่มโค้ดเชื่อมกับ Google Sheets ได้ในอนาคต
-        }
+    function submitSelection() {
+      if (!selectedSeat) {
+        alert('กรุณาเลือกที่นั่งก่อน');
+        return;
       }
+      const name = prompt(`กรุณากรอกชื่อเพื่อจองที่นั่ง ${selectedSeat}:`);
+      if (name) {
+        alert(`ขอบคุณ ${name} ที่จองที่นั่ง ${selectedSeat}`);
+        // ที่นี่สามารถเพิ่มโค้ดส่งข้อมูลไป Google Sheets ได้
+      }
+    }
 
-      function resetSelection() {
-        if (selectedSeat) {
-          document.querySelector(`button[onclick="selectSeat('${selectedSeat}')"]`).style.backgroundColor = '#7ed957';
-          selectedSeat = null;
-        }
+    function resetSelection() {
+      if (selectedSeat) {
+        document.querySelector(`button[onclick="selectSeat('${selectedSeat}')"]`).style.backgroundColor = '#7ed957';
+        selectedSeat = null;
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
