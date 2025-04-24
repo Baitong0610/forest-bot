@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: sans-serif;
-      background-color: #e5f0df;
+      background-color: #f0f4ec;
       text-align: center;
     }
     .seat-map {
@@ -19,19 +19,20 @@
     }
     .seat-button {
       position: absolute;
-      width: 35px;
-      height: 30px;
-      background-color: #d1e7dd;
-      border: 1px solid #6c757d;
-      border-radius: 5px;
+      width: 40px;
+      height: 40px;
+      background-color: #9ccc65;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
       cursor: pointer;
     }
     .seat-button.selected {
-      background-color: #198754;
+      background-color: #558b2f;
       color: white;
     }
     .seat-button.taken {
-      background-color: #6c757d;
+      background-color: #757575;
       color: white;
       cursor: not-allowed;
     }
@@ -44,11 +45,11 @@
       cursor: pointer;
     }
     #confirm {
-      background-color: #198754;
+      background-color: #4caf50;
       color: white;
     }
     #reset {
-      background-color: #6c757d;
+      background-color: #757575;
       color: white;
     }
   </style>
@@ -58,19 +59,19 @@
   <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
   <div class="seat-map">
     <img src="resized-bus-seat-map.png" alt="seat-map" />
-    
-    <!-- ปรับให้ตรงกับภาพใหม่ -->
-    <button class="seat-button" style="top: 42px; left: 275px;">A1</button>
-    <button class="seat-button" style="top: 42px; left: 230px;">A2</button>
-    <button class="seat-button" style="top: 42px; left: 185px;">A3</button>
 
-    <button class="seat-button" style="top: 108px; left: 190px;">A4</button>
-    <button class="seat-button" style="top: 108px; left: 235px;">A5</button>
-    <button class="seat-button" style="top: 108px; left: 280px;">A6</button>
+    <!-- ตำแหน่งใหม่ตรงกับภาพ -->
+    <button class="seat-button" style="top: 78px; left: 275px;">A1</button>
+    <button class="seat-button" style="top: 78px; left: 225px;">A2</button>
+    <button class="seat-button" style="top: 78px; left: 172px;">A3</button>
 
-    <button class="seat-button" style="top: 208px; left: 280px;">A7</button>
-    <button class="seat-button" style="top: 208px; left: 235px;">A8</button>
-    <button class="seat-button" style="top: 208px; left: 190px;">A9</button>
+    <button class="seat-button" style="top: 170px; left: 275px;">A4</button>
+    <button class="seat-button" style="top: 170px; left: 222px;">A5</button>
+    <button class="seat-button" style="top: 170px; left: 172px;">A6</button>
+
+    <button class="seat-button" style="top: 262px; left: 275px;">A7</button>
+    <button class="seat-button" style="top: 262px; left: 225px;">A8</button>
+    <button class="seat-button" style="top: 262px; left: 172px;">A9</button>
   </div>
 
   <div style="margin-top: 20px;">
@@ -102,7 +103,7 @@
         const name = prompt("กรุณากรอกชื่อผู้จอง:");
         if (name) {
           alert(`จองที่นั่ง ${selected.join(', ')} ให้คุณ ${name} เรียบร้อยแล้ว`);
-          // เพิ่มเชื่อม Google Sheets ที่นี่ได้ภายหลัง
+          // เชื่อม Google Sheets ตรงนี้ได้ในอนาคต
         }
       }
     });
