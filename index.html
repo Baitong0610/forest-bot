@@ -31,7 +31,7 @@
       width: 400px;
       height: 900px;
       position: relative;
-      margin: 30px auto;
+      margin: 30px auto 10px auto; /* ลด margin ล่างเหลือ 10px */
       border-radius: 10px;
     }
 
@@ -62,7 +62,7 @@
     }
 
     .button-container {
-      margin-top: 10px;
+      margin-top: 10px; /* ขยับปุ่มขึ้นมาใกล้แผนที่ */
     }
 
     .confirm-btn, .reset-btn {
@@ -89,17 +89,17 @@
   <h1>เลือกที่นั่งของคุณ</h1>
   <p>กดเลือกที่นั่งเพื่อทำการจอง</p>
 
- <div class="seat-map">
-  <button class="seat-button" style="top: 233px; left: 100px;" id="A1">A1</button>
-  <button class="seat-button" style="top: 233px; left: 180px;" id="A2">A2</button>
-  <button class="seat-button" style="top: 233px; left: 260px;" id="A3">A3</button>
-  <button class="seat-button" style="top: 359.9px; left: 265px;" id="A4">A4</button>
-  <button class="seat-button" style="top: 359.9px; left: 190px;" id="A5">A5</button>
-  <button class="seat-button" style="top: 359.9px; left: 95px;" id="A6">A6</button>
-  <button class="seat-button" style="top: 505px; left: 260px;" id="A7">A7</button>
-  <button class="seat-button" style="top: 505px; left: 180px;" id="A8">A8</button>
-  <button class="seat-button" style="top: 505px; left: 95px;" id="A9">A9</button>
-</div>
+  <div class="seat-map">
+    <button class="seat-button" style="top: 233px; left: 100px;" id="A1">A1</button>
+    <button class="seat-button" style="top: 233px; left: 180px;" id="A2">A2</button>
+    <button class="seat-button" style="top: 233px; left: 260px;" id="A3">A3</button>
+    <button class="seat-button" style="top: 359.9px; left: 265px;" id="A4">A4</button>
+    <button class="seat-button" style="top: 359.9px; left: 190px;" id="A5">A5</button>
+    <button class="seat-button" style="top: 359.9px; left: 95px;" id="A6">A6</button>
+    <button class="seat-button" style="top: 505px; left: 260px;" id="A7">A7</button>
+    <button class="seat-button" style="top: 505px; left: 180px;" id="A8">A8</button>
+    <button class="seat-button" style="top: 505px; left: 95px;" id="A9">A9</button>
+  </div>
 
   <div class="button-container">
     <button class="confirm-btn" onclick="confirmBooking()">ยืนยันการจอง</button>
