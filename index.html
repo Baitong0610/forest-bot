@@ -2,91 +2,72 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>เลือกที่นั่ง</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เลือกที่นั่งกับ Forrest</title>
   <style>
     body {
-      margin: 0;
       font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      text-align: center;
+      background-color: #edf7f3;
+      margin: 0;
+      padding: 0;
     }
-    .seat-map {
+
+    h2 {
+      margin-top: 20px;
+      color: #206c42;
+    }
+
+    .seating-container {
       position: relative;
-      width: 360px;
+      width: 320px;
+      height: 480px;
+      margin: 20px auto;
       background: url('bus-seat-map.png') no-repeat center/contain;
-      height: 700px;
     }
-    .seat-btn {
+
+    .seat {
       position: absolute;
-      width: 40px;
-      height: 30px;
-      font-size: 14px;
-      background-color: #d0f0c0;
-      border: 1px solid #444;
-      border-radius: 6px;
+      width: 50px;
+      height: 50px;
+      background-color: #ffffffcc;
+      border: 1px solid #aaa;
+      border-radius: 8px;
       cursor: pointer;
     }
-    .selected {
-      background-color: #ffa;
+
+    .seat:hover {
+      background-color: #d1e7dd;
     }
-    .booked {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    #confirm-btn {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-    }
+
+    /* ปรับตำแหน่งที่นั่งให้ตรงกับภาพ */
+    #A1 { top: 80px; left: 70px; }
+    #A2 { top: 80px; left: 135px; }
+    #A3 { top: 80px; left: 200px; }
+    #A4 { top: 80px; left: 265px; }
+    #A5 { top: 160px; left: 70px; }
+    #A6 { top: 160px; left: 135px; }
+    #A7 { top: 160px; left: 200px; }
+    #A8 { top: 160px; left: 265px; }
+    #A9 { top: 240px; left: 135px; }
   </style>
 </head>
 <body>
   <h2>เลือกที่นั่งของคุณ</h2>
-  <div class="seat-map" id="seat-map">
-    <!-- ปุ่มที่นั่ง -->
-    <button class="seat-btn" style="top: 130px; left: 260px;" data-seat="A1">1</button>
-    <button class="seat-btn" style="top: 130px; left: 200px;" data-seat="A2">2</button>
-    <button class="seat-btn" style="top: 130px; left: 140px;" data-seat="A3">3</button>
-    <button class="seat-btn" style="top: 230px; left: 260px;" data-seat="A4">4</button>
-    <button class="seat-btn" style="top: 230px; left: 200px;" data-seat="A5">5</button>
-    <button class="seat-btn" style="top: 230px; left: 140px;" data-seat="A6">6</button>
-    <button class="seat-btn" style="top: 330px; left: 260px;" data-seat="A7">7</button>
-    <button class="seat-btn" style="top: 330px; left: 200px;" data-seat="A8">8</button>
-    <button class="seat-btn" style="top: 330px; left: 140px;" data-seat="A9">9</button>
+  <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
+
+  <div class="seating-container">
+    <button class="seat" id="A1">A1</button>
+    <button class="seat" id="A2">A2</button>
+    <button class="seat" id="A3">A3</button>
+    <button class="seat" id="A4">A4</button>
+    <button class="seat" id="A5">A5</button>
+    <button class="seat" id="A6">A6</button>
+    <button class="seat" id="A7">A7</button>
+    <button class="seat" id="A8">A8</button>
+    <button class="seat" id="A9">A9</button>
   </div>
 
-  <button id="confirm-btn">ยืนยันการจอง</button>
-
-  <script>
-    const seatButtons = document.querySelectorAll('.seat-btn');
-    let selectedSeat = null;
-
-    seatButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (btn.classList.contains('booked')) return;
-
-        if (selectedSeat) selectedSeat.classList.remove('selected');
-        selectedSeat = btn;
-        btn.classList.add('selected');
-      });
-    });
-
-    document.getElementById('confirm-btn').addEventListener('click', () => {
-      if (!selectedSeat) {
-        alert('กรุณาเลือกที่นั่งก่อน');
-        return;
-      }
-
-      const name = prompt('กรุณากรอกชื่อผู้จอง:');
-      if (name) {
-        selectedSeat.innerText = name;
-        selectedSeat.classList.remove('selected');
-        selectedSeat.classList.add('booked');
-        selectedSeat.disabled = true;
-      }
-    });
-  </script>
+  <script src="index.js"></script>
 </body>
 </html>
