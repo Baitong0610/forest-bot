@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
@@ -57,13 +58,12 @@
 
     .seat-button.taken {
       background-color: #ccc;
+      color: #333;
       cursor: not-allowed;
     }
 
     .button-container {
-      position: relative;
-      top: -220px; /* ย้ายขึ้นจากเดิม */
-      z-index: 10; /* ให้ปุ่มอยู่บนสุด */
+      margin-top: 20px;
     }
 
     .confirm-btn, .reset-btn {
@@ -91,15 +91,15 @@
   <p>กดเลือกที่นั่งเพื่อทำการจอง</p>
 
   <div class="seat-map">
-    <button class="seat-button" style="top: 233px; left: 100px;" id="A1">A1</button>
-    <button class="seat-button" style="top: 233px; left: 180px;" id="A2">A2</button>
-    <button class="seat-button" style="top: 233px; left: 260px;" id="A3">A3</button>
-    <button class="seat-button" style="top: 359.9px; left: 265px;" id="A4">A4</button>
-    <button class="seat-button" style="top: 359.9px; left: 190px;" id="A5">A5</button>
-    <button class="seat-button" style="top: 359.9px; left: 95px;" id="A6">A6</button>
-    <button class="seat-button" style="top: 505px; left: 260px;" id="A7">A7</button>
-    <button class="seat-button" style="top: 505px; left: 180px;" id="A8">A8</button>
-    <button class="seat-button" style="top: 505px; left: 95px;" id="A9">A9</button>
+    <button class="seat-button" style="top: 233px; left: 100px;" data-seat="A1" id="A1">A1</button>
+    <button class="seat-button" style="top: 233px; left: 180px;" data-seat="A2" id="A2">A2</button>
+    <button class="seat-button" style="top: 233px; left: 260px;" data-seat="A3" id="A3">A3</button>
+    <button class="seat-button" style="top: 359.9px; left: 265px;" data-seat="A4" id="A4">A4</button>
+    <button class="seat-button" style="top: 359.9px; left: 190px;" data-seat="A5" id="A5">A5</button>
+    <button class="seat-button" style="top: 359.9px; left: 95px;" data-seat="A6" id="A6">A6</button>
+    <button class="seat-button" style="top: 505px; left: 260px;" data-seat="A7" id="A7">A7</button>
+    <button class="seat-button" style="top: 505px; left: 180px;" data-seat="A8" id="A8">A8</button>
+    <button class="seat-button" style="top: 505px; left: 95px;" data-seat="A9" id="A9">A9</button>
   </div>
 
   <div class="button-container">
@@ -108,7 +108,10 @@
   </div>
 
   <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwfMB49NCyDqlE-DEu38RDtagdygAqgbTVWmRoewDG43Dcyh6fY3nZ8sjKNSaNwU0fGIg/exec";
     const seatButtons = document.querySelectorAll('.seat-button');
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupId = urlParams.get('group');
 
     seatButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -118,29 +121,46 @@
       });
     });
 
-    function confirmBooking() {
-      const selected = document.querySelectorAll('.seat-button.selected');
-      if (selected.length === 0) {
-        alert('กรุณาเลือกที่นั่งก่อน');
-        return;
-      }
-
-      const name = prompt("กรุณาใส่ชื่อของคุณ:");
-      if (!name) return;
-
-      selected.forEach(btn => {
-        btn.textContent = name;
-        btn.classList.remove('selected');
-        btn.classList.add('taken');
-      });
-    }
-
     function resetSelection() {
       seatButtons.forEach(btn => {
         if (!btn.classList.contains('taken')) {
           btn.classList.remove('selected');
         }
       });
+    }
+
+    async function confirmBooking() {
+      const selected = document.querySelectorAll('.seat-button.selected');
+      if (selected.length === 0) {
+        alert("กรุณาเลือกที่นั่งก่อนค่ะ");
+        return;
+      }
+
+      const name = prompt("กรุณากรอกชื่อของคุณเพื่อจองที่นั่งค่ะ:");
+      if (!name) return;
+
+      for (const btn of selected) {
+        const seat = btn.dataset.seat;
+
+        try {
+          const res = await fetch(scriptURL, {
+            method: "POST",
+            body: new URLSearchParams({ seat, name, groupId })
+          });
+
+          const result = await res.json();
+          if (result.status === "success") {
+            btn.textContent = name;
+            btn.classList.remove('selected');
+            btn.classList.add('taken');
+          } else {
+            alert("❌ " + result.message);
+          }
+        } catch (err) {
+          alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+          console.error(err);
+        }
+      }
     }
   </script>
 </body>
