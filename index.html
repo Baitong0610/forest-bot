@@ -3,137 +3,133 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>เลือกที่นั่ง</title>
+  <title>เลือกที่นั่งของคุณ</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
-
     body {
-      font-family: 'Kanit', sans-serif;
-      background-color: #f1f1e6;
+      font-family: sans-serif;
+      background-color: #eef0e6;
       text-align: center;
       margin: 0;
-      padding: 0;
+      padding: 2rem 1rem;
     }
 
     h1 {
-      margin-top: 30px;
-      color: #222;
+      font-size: 2rem;
+      margin-bottom: 0.2rem;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
     }
 
     .seat-map {
-      background-image: url("resized-bus-seat-map.png"); /* รูปต้องอยู่โฟลเดอร์เดียวกับ HTML */
-      background-size: 100% 100%;
+      background-image: url("resized-bus-seat-map.png");
+      background-size: contain;
       background-repeat: no-repeat;
-      width: 700px;
-      height: 950px;
+      width: 390px;
+      height: 915px;
       position: relative;
-      margin: 30px auto;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin: auto;
     }
 
     .seat-button {
       position: absolute;
-      width: 60px;
-      height: 40px;
-      background-color: #b5e48c;
+      padding: 6px 10px;
+      background-color: #4caf50;
+      color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 20px;
       cursor: pointer;
-      font-weight: bold;
-      font-size: 16px;
+      font-size: 0.9rem;
+      transform: translate(-50%, -50%);
     }
 
     .seat-button.selected {
-      background-color: #52b788;
-      color: white;
+      background-color: #f44336;
     }
 
-    .seat-button.taken {
-      background-color: #ccc;
-      cursor: not-allowed;
+    .actions {
+      margin-top: 2rem;
     }
 
-    .button-container {
-      margin-top: 20px;
-    }
-
-    .confirm-btn, .reset-btn {
-      padding: 10px 20px;
+    .btn {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
       border: none;
-      border-radius: 6px;
-      margin: 0 10px;
-      font-weight: bold;
-      font-size: 16px;
+      border-radius: 10px;
       cursor: pointer;
+      margin: 0 0.5rem;
     }
 
     .confirm-btn {
-      background-color: #52b788;
+      background-color: #4caf50;
       color: white;
     }
 
     .reset-btn {
-      background-color: #6c757d;
+      background-color: #666;
       color: white;
     }
   </style>
 </head>
 <body>
   <h1>เลือกที่นั่งของคุณ</h1>
-  <p>กดเลือกที่นั่งเพื่อทำการจอง</p>
+  <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
 
-  <div class="seat-map" id="seatMap">
-    <button class="seat-button" style="top: 66px; left: 227px;" id="A1">A1</button>
-    <button class="seat-button" style="top: 66px; left: 176px;" id="A2">A2</button>
-    <button class="seat-button" style="top: 126px; left: 176px;" id="A3">A3</button>
-    <button class="seat-button" style="top: 196px; left: 227px;" id="A4">A4</button>
-    <button class="seat-button" style="top: 196px; left: 176px;" id="A5">A5</button>
-    <button class="seat-button" style="top: 256px; left: 176px;" id="A6">A6</button>
-    <button class="seat-button" style="top: 316px; left: 176px;" id="A7">A7</button>
-    <button class="seat-button" style="top: 376px; left: 176px;" id="A8">A8</button>
-    <button class="seat-button" style="top: 436px; left: 176px;" id="A9">A9</button>
+  <div class="seat-map">
+    <!-- ปุ่มที่นั่ง A1-A9 -->
+    <button class="seat-button" style="top: 65px; left: 330px;" onclick="selectSeat(this)">A1</button>
+    <button class="seat-button" style="top: 95px; left: 280px;" onclick="selectSeat(this)">A2</button>
+    <button class="seat-button" style="top: 95px; left: 180px;" onclick="selectSeat(this)">A3</button>
+
+    <button class="seat-button" style="top: 200px; left: 330px;" onclick="selectSeat(this)">A4</button>
+    <button class="seat-button" style="top: 230px; left: 280px;" onclick="selectSeat(this)">A5</button>
+    <button class="seat-button" style="top: 265px; left: 180px;" onclick="selectSeat(this)">A6</button>
+
+    <button class="seat-button" style="top: 310px; left: 280px;" onclick="selectSeat(this)">A7</button>
+    <button class="seat-button" style="top: 350px; left: 280px;" onclick="selectSeat(this)">A8</button>
+    <button class="seat-button" style="top: 380px; left: 180px;" onclick="selectSeat(this)">A9</button>
   </div>
 
-  <div class="button-container">
-    <button class="confirm-btn" onclick="confirmBooking()">ยืนยันการจอง</button>
-    <button class="reset-btn" onclick="resetSelection()">รีเซ็ต</button>
+  <div class="actions">
+    <button class="btn confirm-btn" onclick="confirmBooking()">ยืนยันการจอง</button>
+    <button class="btn reset-btn" onclick="resetSeats()">รีเซ็ต</button>
   </div>
 
   <script>
-    const seatButtons = document.querySelectorAll('.seat-button');
+    let selectedSeat = null;
 
-    seatButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!btn.classList.contains('taken')) {
-          btn.classList.toggle('selected');
-        }
-      });
-    });
+    function selectSeat(button) {
+      if (selectedSeat) {
+        selectedSeat.classList.remove("selected");
+      }
+      selectedSeat = button;
+      button.classList.add("selected");
+    }
 
     function confirmBooking() {
-      const selected = document.querySelectorAll('.seat-button.selected');
-      if (selected.length === 0) {
-        alert('กรุณาเลือกที่นั่งก่อน');
+      if (!selectedSeat) {
+        alert("กรุณาเลือกที่นั่งก่อน");
         return;
       }
 
-      const name = prompt("กรุณาใส่ชื่อของคุณ:");
-      if (!name) return;
-
-      selected.forEach(btn => {
-        btn.textContent = name;
-        btn.classList.remove('selected');
-        btn.classList.add('taken');
-      });
+      const name = prompt("กรอกชื่อของคุณเพื่อยืนยันการจอง:");
+      if (name) {
+        selectedSeat.innerText = name;
+        selectedSeat.disabled = true;
+        selectedSeat.classList.remove("selected");
+        selectedSeat = null;
+      }
     }
 
-    function resetSelection() {
-      seatButtons.forEach(btn => {
-        if (!btn.classList.contains('taken')) {
-          btn.classList.remove('selected');
-        }
+    function resetSeats() {
+      const buttons = document.querySelectorAll(".seat-button");
+      buttons.forEach((btn) => {
+        btn.innerText = btn.getAttribute("onclick").match(/"(.+?)"/)[1]; // คืนค่าเดิม
+        btn.disabled = false;
+        btn.classList.remove("selected");
       });
+      selectedSeat = null;
     }
   </script>
 </body>
