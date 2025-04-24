@@ -2,59 +2,57 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>เลือกที่นั่ง Forrest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เลือกที่นั่งของคุณ</title>
   <style>
     body {
       font-family: sans-serif;
+      background-color: #e6f2e6;
       text-align: center;
-      background-color: #e8f5e9;
       margin: 0;
+      padding: 0;
     }
-
     h2 {
-      color: #1b5e20;
+      color: green;
       margin-top: 20px;
     }
-
-    .container {
+    .seat-map-container {
       position: relative;
-      width: 400px;
-      margin: 20px auto;
+      width: 360px;
+      margin: 0 auto;
     }
-
-    .seat-map {
+    .seat-map-container img {
       width: 100%;
       display: block;
     }
-
     .seat-button {
       position: absolute;
       padding: 4px 6px;
-      border: none;
-      border-radius: 8px;
       font-size: 12px;
-      background-color: #ffffffaa;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
       cursor: pointer;
-      transition: 0.2s;
     }
-
     .seat-button.booked {
-      background-color: #a5d6a7;
+      background-color: #f88;
       cursor: not-allowed;
     }
-
-    .seat-button:hover:not(.booked) {
-      background-color: #81c784;
-    }
-
-    .controls {
-      margin-top: 20px;
-    }
-
-    #selectedSeat {
+    #selected-seat {
       margin-top: 10px;
-      font-weight: bold;
+    }
+    #confirm-btn, #reset-btn {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      background-color: green;
+      color: white;
+      cursor: pointer;
+    }
+    #reset-btn {
+      background-color: gray;
     }
   </style>
 </head>
@@ -62,63 +60,63 @@
   <h2>เลือกที่นั่งของคุณ</h2>
   <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
 
-  <div class="container">
-    <img src="bus-seat-map.png" alt="ผังที่นั่ง" class="seat-map"/>
+  <div class="seat-map-container">
+    <img src="6545a78f-3aad-4663-80fd-ecedb5a885a9.png" alt="seat-map" />
 
-    <!-- ปุ่มที่นั่ง (แก้ตำแหน่งให้ตรงรูป) -->
-    <button class="seat-button" style="top: 28px; left: 25px;" onclick="selectSeat('A3')">A3</button>
-    <button class="seat-button" style="top: 28px; left: 140px;" onclick="selectSeat('A1')">A1</button>
-    <button class="seat-button" style="top: 80px; left: 60px;" onclick="selectSeat('A6')">A6</button>
-    <button class="seat-button" style="top: 80px; left: 145px;" onclick="selectSeat('A4')">A4</button>
-    <button class="seat-button" style="top: 110px; left: 70px;" onclick="selectSeat('A5')">A5</button>
-    <button class="seat-button" style="top: 110px; left: 180px;" onclick="selectSeat('A2')">A2</button>
-    <button class="seat-button" style="top: 160px; left: 30px;" onclick="selectSeat('A9')">A9</button>
-    <button class="seat-button" style="top: 160px; left: 105px;" onclick="selectSeat('A8')">A8</button>
-    <button class="seat-button" style="top: 160px; left: 180px;" onclick="selectSeat('A7')">A7</button>
+    <!-- ปรับตำแหน่งตามภาพใหม่ -->
+    <button class="seat-button" style="top: 43%; left: 75%;" data-seat="A1">A1</button>
+    <button class="seat-button" style="top: 43%; left: 64%;" data-seat="A2">A2</button>
+    <button class="seat-button" style="top: 43%; left: 53%;" data-seat="A3">A3</button>
+    <button class="seat-button" style="top: 53%; left: 53%;" data-seat="A4">A4</button>
+    <button class="seat-button" style="top: 53%; left: 64%;" data-seat="A5">A5</button>
+    <button class="seat-button" style="top: 53%; left: 75%;" data-seat="A6">A6</button>
+    <button class="seat-button" style="top: 63%; left: 75%;" data-seat="A7">A7</button>
+    <button class="seat-button" style="top: 63%; left: 64%;" data-seat="A8">A8</button>
+    <button class="seat-button" style="top: 63%; left: 53%;" data-seat="A9">A9</button>
   </div>
 
-  <div class="controls">
-    <div id="selectedSeat">ยังไม่ได้เลือกที่นั่ง</div>
-    <button onclick="confirmSeat()">ยืนยันการจอง</button>
-    <button onclick="resetSeat()">รีเซ็ต</button>
-  </div>
+  <div id="selected-seat"></div>
+
+  <button id="confirm-btn">ยืนยันการจอง</button>
+  <button id="reset-btn">รีเซ็ต</button>
 
   <script>
+    const seatButtons = document.querySelectorAll(".seat-button");
+    const selectedSeatDiv = document.getElementById("selected-seat");
+    const confirmBtn = document.getElementById("confirm-btn");
+    const resetBtn = document.getElementById("reset-btn");
     let selectedSeat = null;
 
-    function selectSeat(seat) {
-      if (document.querySelector(`[onclick="selectSeat('${seat}')"]`).classList.contains('booked')) return;
-      selectedSeat = seat;
-      document.getElementById('selectedSeat').innerText = `คุณเลือกที่นั่ง ${seat}`;
-    }
+    seatButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        if (button.classList.contains("booked")) return;
 
-    function confirmSeat() {
-      if (!selectedSeat) {
-        alert('กรุณาเลือกที่นั่งก่อน');
-        return;
-      }
-      const name = prompt('กรุณากรอกชื่อผู้จอง:');
-      if (!name) return;
-
-      const btn = document.querySelector(`[onclick="selectSeat('${selectedSeat}')"]`);
-      btn.innerText = name;
-      btn.classList.add('booked');
-      btn.disabled = true;
-
-      selectedSeat = null;
-      document.getElementById('selectedSeat').innerText = 'จองสำเร็จ!';
-    }
-
-    function resetSeat() {
-      document.querySelectorAll('.seat-button').forEach(btn => {
-        btn.disabled = false;
-        btn.classList.remove('booked');
-        btn.innerText = btn.getAttribute('onclick').match(/'(.*?)'/)[1];
+        seatButtons.forEach(btn => btn.classList.remove("selected"));
+        button.classList.add("selected");
+        selectedSeat = button.getAttribute("data-seat");
+        selectedSeatDiv.innerText = `คุณเลือกที่นั่ง: ${selectedSeat}`;
       });
+    });
+
+    confirmBtn.addEventListener("click", () => {
+      if (selectedSeat) {
+        const name = prompt("กรุณากรอกชื่อผู้จอง:");
+        if (name) {
+          const selectedButton = document.querySelector(`[data-seat="${selectedSeat}"]`);
+          selectedButton.innerText = name;
+          selectedButton.classList.add("booked");
+          selectedButton.classList.remove("selected");
+          selectedSeatDiv.innerText = "";
+          selectedSeat = null;
+        }
+      }
+    });
+
+    resetBtn.addEventListener("click", () => {
       selectedSeat = null;
-      document.getElementById('selectedSeat').innerText = 'ยังไม่ได้เลือกที่นั่ง';
-    }
+      selectedSeatDiv.innerText = "";
+      seatButtons.forEach(btn => btn.classList.remove("selected"));
+    });
   </script>
 </body>
 </html>
-
