@@ -30,3 +30,47 @@
       position: absolute;
       width: 50px;
       height: 50px;
+      background-color: #ffffffcc;
+      border: 1px solid #aaa;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .seat:hover {
+      background-color: #d1e7dd;
+    }
+
+    /* ปรับให้เรียง 3 ที่นั่งต่อแถว */
+    #A3 { top: 105px; left: 55px; }
+    #A2 { top: 105px; left: 145px; }
+    #A1 { top: 105px; left: 235px; }
+
+    #A6 { top: 185px; left: 55px; }
+    #A5 { top: 185px; left: 145px; }
+    #A4 { top: 185px; left: 235px; }
+
+    #A9 { top: 265px; left: 55px; }
+    #A8 { top: 265px; left: 145px; }
+    #A7 { top: 265px; left: 235px; }
+  </style>
+</head>
+<body>
+  <h2>เลือกที่นั่งของคุณ</h2>
+  <p>กดที่เบอร์ที่นั่งเพื่อทำการจอง</p>
+
+  <div class="seating-container">
+    <button class="seat" id="A1">A1</button>
+    <button class="seat" id="A2">A2</button>
+    <button class="seat" id="A3">A3</button>
+    <button class="seat" id="A4">A4</button>
+    <button class="seat" id="A5">A5</button>
+    <button class="seat" id="A6">A6</button>
+    <button class="seat" id="A7">A7</button>
+    <button class="seat" id="A8">A8</button>
+    <button class="seat" id="A9">A9</button>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>
