@@ -1,17 +1,16 @@
 {
-  "name": "nodejs",
+  "name": "forest-line-bot",
   "version": "1.0.0",
-  "description": "",
+  "description": "LINE Bot + Backend สำหรับจองที่นั่ง",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Tong",
   "license": "ISC",
   "dependencies": {
     "@line/bot-sdk": "^9.9.0",
-    "@types/node": "^22.13.11",
     "express": "^5.1.0"
   }
 }
