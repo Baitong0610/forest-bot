@@ -1,56 +1,60 @@
 const express = require('express');
 const line = require('@line/bot-sdk');
-const bodyParser = require('body-parser');
 const cors = require('cors');
+const bodyParser = require('body-parser'); // ใช้เฉพาะ /reserve
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
 
-// LINE Bot Configuration
+// ✅ LINE SDK config
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
-  channelSecret: process.env.CHANNEL_SECRET,
+  channelSecret: process.env.CHANNEL_SECRET
 };
+
 const client = new line.Client(config);
 
-// Root route
+// ✅ GET: หน้าหลัก ให้ Render ตรวจสุขภาพเซิร์ฟเวอร์
 app.get('/', (req, res) => {
   console.log("✅ GET / hit!");
   res.send('🌳 Forest Bot is running!');
 });
 
-// Reserve route (from frontend)
-app.post('/reserve', (req, res) => {
-  const { userId, seatNumber, contextId } = req.body;
-
-  if (!userId || !seatNumber || !contextId) {
-    return res.status(400).json({ message: 'Missing userId, seatNumber, or contextId' });
-  }
-
-  console.log(`🪑 จองที่นั่ง: userId=${userId}, seat=${seatNumber}, contextId=${contextId}`);
-  res.json({ message: `จองที่นั่ง ${seatNumber} สำเร็จในกลุ่ม ${contextId}` });
-});
-
-// Webhook route
-let lastWelcomeSentAt = 0;
-const WELCOME_INTERVAL_MS = 5 * 1000;
-
+// ✅ POST: webhook จาก LINE (ต้องมาก่อน bodyParser.json)
 app.post('/webhook', line.middleware(config), async (req, res) => {
   try {
     await Promise.all(req.body.events.map(handleEvent));
     res.status(200).end();
   } catch (err) {
-    console.error("❌ Webhook error:", err);
+    console.error("❌ Error in /webhook:", err);
     res.status(500).end();
   }
 });
 
-// Handle all LINE events
+// ✅ POST: สำหรับจองที่นั่ง (ใช้ bodyParser แบบ json ได้)
+app.post('/reserve', bodyParser.json(), async (req, res) => {
+  const { userId, seatNumber, groupId } = req.body;
+
+  if (!userId || !seatNumber || !groupId) {
+    return res.status(400).json({ message: '❌ Missing userId, seatNumber, or groupId' });
+  }
+
+  console.log(`📌 Group ${groupId}: User ${userId} จองที่นั่งหมายเลข ${seatNumber}`);
+
+  // 🔜 ต่อไปจะเพิ่มระบบบันทึก Google Sheets ตรงนี้
+
+  res.json({ message: `✅ จองที่นั่ง ${seatNumber} เรียบร้อยในกลุ่ม ${groupId}` });
+});
+
+
+// ✅ Handler: ตอบกลับเมื่อสมาชิกเข้ากลุ่ม หรือพิมพ์ข้อความ
+let lastWelcomeSentAt = 0;
+const WELCOME_INTERVAL_MS = 5 * 1000;
+
 async function handleEvent(event) {
   if (!event.replyToken) return;
 
-  // Welcome message when member joins group
+  // ✅ ต้อนรับสมาชิกใหม่
   if (event.type === 'memberJoined') {
     const now = Date.now();
     if (now - lastWelcomeSentAt < WELCOME_INTERVAL_MS) return;
@@ -59,7 +63,7 @@ async function handleEvent(event) {
     const welcomeMessages = [
       {
         type: 'text',
-        text: `สวัสดีฮะ พี่ๆ นักท่องเที่ยวที่เพิ่งเข้ามา\nผมชื่อ Forest หรือเรียก Rest ก็ได้ฮะ ผมเป็นตัวแทนของ เพจเที่ยวกับเพื่อน ❤️`
+        text: `สวัสดีฮะ พี่ๆ นักท่องเที่ยวที่เพิ่งเข้ามา\nผมชื่อ Forest หรือเรียก Rest ก็ได้ฮะ ผมเป็นตัวแทนของเพจเที่ยวกับเพื่อน ❤️`
       },
       {
         type: 'text',
@@ -75,11 +79,10 @@ async function handleEvent(event) {
     return client.replyMessage(event.replyToken, welcomeMessages);
   }
 
-  // Text message
+  // ✅ ตอบกลับเมื่อพิมพ์บางคำ
   if (event.type === 'message' && event.message.type === 'text') {
     const msg = event.message.text.toLowerCase();
 
-    // คำว่า "เรสมาลาพี่ๆ"
     if (msg.includes('เรสมาลาพี่ๆ')) {
       const byeMessages = [
         {
@@ -94,24 +97,11 @@ async function handleEvent(event) {
 
       return client.replyMessage(event.replyToken, byeMessages);
     }
-
-    // คำว่า "จองที่นั่ง"
-    if (msg.includes('จองที่นั่ง')) {
-      const userId = event.source.userId;
-      const contextId = event.source.groupId || event.source.roomId || 'unknown';
-      const bookingUrl = `https://baitong0610.github.io/forest-bot/?userId=${userId}&contextId=${contextId}`;
-      const reply = {
-        type: 'text',
-        text: `🌲 จองที่นั่งได้ที่นี่เลยฮะ: ${bookingUrl}`
-      };
-      return client.replyMessage(event.replyToken, reply);
-    }
   }
 }
 
-// Start server
+// ✅ Start Server
 const port = process.env.PORT || 3000;
-console.log("🟢 Starting server on port:", port);
 app.listen(port, () => {
   console.log(`🌳 Forest bot running on port ${port}`);
 });
