@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const app = express();
 app.use(bodyParser.json());
 
+// ตั้งค่า LINE
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.CHANNEL_SECRET
@@ -12,12 +13,12 @@ const config = {
 
 const client = new line.Client(config);
 
-// ✅ Route สำหรับเช็คว่าเว็บรันอยู่มั้ย
+// ✅ Route หน้าหลัก เพื่อให้ Render รู้ว่าเว็บยังรันอยู่
 app.get('/', (req, res) => {
-  res.send('OK from forest-bot');
+  res.send('🌳 Forest Bot is running!');
 });
 
-// ✅ Route สำหรับจองที่นั่ง (ตัวอย่างเรียบง่าย)
+// ✅ Route สำหรับจองที่นั่ง
 app.post('/reserve', (req, res) => {
   const { userId, seatNumber } = req.body;
 
@@ -25,13 +26,11 @@ app.post('/reserve', (req, res) => {
     return res.status(400).json({ message: 'Missing userId or seatNumber' });
   }
 
-  // 👇 ตรงนี้สามารถเปลี่ยนเป็นบันทึกฐานข้อมูลจริงได้
   console.log(`🔖 User ${userId} จองที่นั่งหมายเลข ${seatNumber}`);
-
   res.json({ message: `จองที่นั่ง ${seatNumber} สำเร็จแล้ว!` });
 });
 
-// ✅ LINE Webhook สำหรับตอบกลับในไลน์
+// ✅ LINE Webhook
 let lastWelcomeSentAt = 0;
 const WELCOME_INTERVAL_MS = 5 * 1000;
 
@@ -73,7 +72,7 @@ async function handleEvent(event) {
     return client.replyMessage(event.replyToken, welcomeMessages);
   }
 
-  // ตอบข้อความที่พิมพ์
+  // เมื่อลูกค้าพิมพ์ข้อความ
   if (event.type === 'message' && event.message.type === 'text') {
     const msg = event.message.text.toLowerCase();
 
@@ -94,9 +93,8 @@ async function handleEvent(event) {
   }
 }
 
-// ✅ Listen บน PORT ที่ Render กำหนด
+// ✅ Start server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`🌳 Forest bot running on port ${port}`);
 });
-
