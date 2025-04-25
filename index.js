@@ -14,6 +14,7 @@ const client = new line.Client(config);
 
 // ✅ Route สำหรับเช็คว่าเว็บรันอยู่มั้ย
 app.get('/', (req, res) => {
+  console.log('✅ Responded to health check');
   res.send('OK');
 });
 
