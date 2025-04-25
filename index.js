@@ -12,6 +12,7 @@ const client = new line.Client(config);
 let lastWelcomeSentAt = 0;
 const WELCOME_INTERVAL_MS = 5 * 1000;
 
+// Webhook สำหรับ LINE
 app.post('/webhook', line.middleware(config), async (req, res) => {
   try {
     await Promise.all(req.body.events.map(handleEvent));
@@ -22,10 +23,11 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
   }
 });
 
+// Handle event ต่างๆ
 async function handleEvent(event) {
   if (!event.replyToken) return Promise.resolve(null);
 
-  // กรณีสมาชิกเข้ากลุ่ม
+  // สมาชิกเข้ากลุ่ม
   if (event.type === 'memberJoined') {
     const now = Date.now();
     if (now - lastWelcomeSentAt < WELCOME_INTERVAL_MS) {
@@ -53,7 +55,7 @@ async function handleEvent(event) {
     return client.replyMessage(event.replyToken, welcomeMessages);
   }
 
-  // กรณีมีข้อความเข้ามา
+  // ข้อความจากผู้ใช้
   if (event.type === 'message' && event.message.type === 'text') {
     const userMessage = event.message.text.toLowerCase();
 
@@ -76,7 +78,13 @@ async function handleEvent(event) {
   return Promise.resolve(null);
 }
 
-const port = 3000;
+// ➕ เพิ่ม route สำหรับ UptimeRobot
+app.get('/ping', (req, res) => {
+  res.send('OK');
+});
+
+// เริ่มต้นเซิร์ฟเวอร์
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`LINE bot listening on port ${port}`);
 });
