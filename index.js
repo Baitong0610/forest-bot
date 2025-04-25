@@ -1,11 +1,13 @@
 const express = require('express');
 const line = require('@line/bot-sdk');
 const bodyParser = require('body-parser');
+const cors = require('cors'); // ✅ เพิ่ม cors
 
 const app = express();
+app.use(cors()); // ✅ เปิดใช้งาน cors
 app.use(bodyParser.json());
 
-// ตั้งค่า LINE
+// ✅ ตั้งค่า LINE
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.CHANNEL_SECRET
@@ -15,6 +17,7 @@ const client = new line.Client(config);
 
 // ✅ Route หน้าหลัก เพื่อให้ Render รู้ว่าเว็บยังรันอยู่
 app.get('/', (req, res) => {
+  console.log("✅ GET / hit!");
   res.send('🌳 Forest Bot is running!');
 });
 
@@ -95,6 +98,7 @@ async function handleEvent(event) {
 
 // ✅ Start server
 const port = process.env.PORT || 3000;
+console.log("🟢 Starting server on port:", port);
 app.listen(port, () => {
   console.log(`🌳 Forest bot running on port ${port}`);
 });
