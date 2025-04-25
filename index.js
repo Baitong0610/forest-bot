@@ -79,10 +79,22 @@ async function handleEvent(event) {
     return client.replyMessage(event.replyToken, welcomeMessages);
   }
 
-  // ✅ ตอบกลับเมื่อพิมพ์บางคำ
+    // ✅ ตอบกลับเมื่อพิมพ์บางคำ
   if (event.type === 'message' && event.message.type === 'text') {
     const msg = event.message.text.toLowerCase();
 
+    // 👉 ตอบจองที่นั่ง
+    if (msg.includes('จองที่นั่ง')) {
+      const groupId = event.source.groupId || 'unknown';
+      const reserveUrl = `https://forest-bot-q28i.onrender.com/reserve?groupId=${groupId}`;
+
+      return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: `ลิงก์จองที่นั่งของกลุ่มนี้ครับพี่ๆ 🪑👇\n${reserveUrl}`
+      });
+    }
+
+    // 👉 ตอบเรสมาลาพี่ๆ
     if (msg.includes('เรสมาลาพี่ๆ')) {
       const byeMessages = [
         {
@@ -98,7 +110,6 @@ async function handleEvent(event) {
       return client.replyMessage(event.replyToken, byeMessages);
     }
   }
-}
 
 // ✅ Start Server
 const port = process.env.PORT || 3000;
