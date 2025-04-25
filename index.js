@@ -1,39 +1,38 @@
 const express = require('express');
 const line = require('@line/bot-sdk');
 const bodyParser = require('body-parser');
-const cors = require('cors'); // ✅ เพิ่ม cors
+const cors = require('cors');
 
 const app = express();
-app.use(cors()); // ✅ เปิดใช้งาน cors
+app.use(cors());
 app.use(bodyParser.json());
 
-// ✅ ตั้งค่า LINE
+// LINE Bot Configuration
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
-  channelSecret: process.env.CHANNEL_SECRET
+  channelSecret: process.env.CHANNEL_SECRET,
 };
-
 const client = new line.Client(config);
 
-// ✅ Route หน้าหลัก เพื่อให้ Render รู้ว่าเว็บยังรันอยู่
+// Root route
 app.get('/', (req, res) => {
   console.log("✅ GET / hit!");
   res.send('🌳 Forest Bot is running!');
 });
 
-// ✅ Route สำหรับจองที่นั่ง
+// Reserve route (from frontend)
 app.post('/reserve', (req, res) => {
-  const { userId, seatNumber } = req.body;
+  const { userId, seatNumber, contextId } = req.body;
 
-  if (!userId || !seatNumber) {
-    return res.status(400).json({ message: 'Missing userId or seatNumber' });
+  if (!userId || !seatNumber || !contextId) {
+    return res.status(400).json({ message: 'Missing userId, seatNumber, or contextId' });
   }
 
-  console.log(`🔖 User ${userId} จองที่นั่งหมายเลข ${seatNumber}`);
-  res.json({ message: `จองที่นั่ง ${seatNumber} สำเร็จแล้ว!` });
+  console.log(`🪑 จองที่นั่ง: userId=${userId}, seat=${seatNumber}, contextId=${contextId}`);
+  res.json({ message: `จองที่นั่ง ${seatNumber} สำเร็จในกลุ่ม ${contextId}` });
 });
 
-// ✅ LINE Webhook
+// Webhook route
 let lastWelcomeSentAt = 0;
 const WELCOME_INTERVAL_MS = 5 * 1000;
 
@@ -42,15 +41,16 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
     await Promise.all(req.body.events.map(handleEvent));
     res.status(200).end();
   } catch (err) {
-    console.error(err);
+    console.error("❌ Webhook error:", err);
     res.status(500).end();
   }
 });
 
+// Handle all LINE events
 async function handleEvent(event) {
   if (!event.replyToken) return;
 
-  // เมื่อมีสมาชิกเข้ากลุ่ม
+  // Welcome message when member joins group
   if (event.type === 'memberJoined') {
     const now = Date.now();
     if (now - lastWelcomeSentAt < WELCOME_INTERVAL_MS) return;
@@ -75,10 +75,11 @@ async function handleEvent(event) {
     return client.replyMessage(event.replyToken, welcomeMessages);
   }
 
-  // เมื่อลูกค้าพิมพ์ข้อความ
+  // Text message
   if (event.type === 'message' && event.message.type === 'text') {
     const msg = event.message.text.toLowerCase();
 
+    // คำว่า "เรสมาลาพี่ๆ"
     if (msg.includes('เรสมาลาพี่ๆ')) {
       const byeMessages = [
         {
@@ -93,10 +94,22 @@ async function handleEvent(event) {
 
       return client.replyMessage(event.replyToken, byeMessages);
     }
+
+    // คำว่า "จองที่นั่ง"
+    if (msg.includes('จองที่นั่ง')) {
+      const userId = event.source.userId;
+      const contextId = event.source.groupId || event.source.roomId || 'unknown';
+      const bookingUrl = `https://baitong0610.github.io/forest-bot/?userId=${userId}&contextId=${contextId}`;
+      const reply = {
+        type: 'text',
+        text: `🌲 จองที่นั่งได้ที่นี่เลยฮะ: ${bookingUrl}`
+      };
+      return client.replyMessage(event.replyToken, reply);
+    }
   }
 }
 
-// ✅ Start server
+// Start server
 const port = process.env.PORT || 3000;
 console.log("🟢 Starting server on port:", port);
 app.listen(port, () => {
