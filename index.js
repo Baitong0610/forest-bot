@@ -1,12 +1,11 @@
 const express = require('express');
 const line = require('@line/bot-sdk');
 const cors = require('cors');
-const bodyParser = require('body-parser'); // ใช้เฉพาะ /reserve
+const bodyParser = require('body-parser');
 
 const app = express();
 app.use(cors());
 
-// ✅ LINE SDK config
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.CHANNEL_SECRET
@@ -14,13 +13,13 @@ const config = {
 
 const client = new line.Client(config);
 
-// ✅ GET: หน้าหลัก ให้ Render ตรวจสุขภาพเซิร์ฟเวอร์
+// หน้าหลัก
 app.get('/', (req, res) => {
   console.log("✅ GET / hit!");
   res.send('🌳 Forest Bot is running!');
 });
 
-// ✅ POST: webhook จาก LINE (ต้องมาก่อน bodyParser.json)
+// Webhook จาก LINE
 app.post('/webhook', line.middleware(config), async (req, res) => {
   try {
     await Promise.all(req.body.events.map(handleEvent));
@@ -31,7 +30,7 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
   }
 });
 
-// ✅ POST: สำหรับจองที่นั่ง (ใช้ bodyParser แบบ json ได้)
+// จองที่นั่ง
 app.post('/reserve', bodyParser.json(), async (req, res) => {
   const { userId, seatNumber, groupId } = req.body;
 
@@ -41,20 +40,19 @@ app.post('/reserve', bodyParser.json(), async (req, res) => {
 
   console.log(`📌 Group ${groupId}: User ${userId} จองที่นั่งหมายเลข ${seatNumber}`);
 
-  // 🔜 ต่อไปจะเพิ่มระบบบันทึก Google Sheets ตรงนี้
+  // 🔜 ต่อไปจะบันทึก Google Sheets
 
   res.json({ message: `✅ จองที่นั่ง ${seatNumber} เรียบร้อยในกลุ่ม ${groupId}` });
 });
 
-
-// ✅ Handler: ตอบกลับเมื่อสมาชิกเข้ากลุ่ม หรือพิมพ์ข้อความ
+// Event Handler
 let lastWelcomeSentAt = 0;
 const WELCOME_INTERVAL_MS = 5 * 1000;
 
 async function handleEvent(event) {
   if (!event.replyToken) return;
 
-  // ✅ ต้อนรับสมาชิกใหม่
+  // ต้อนรับสมาชิกใหม่
   if (event.type === 'memberJoined') {
     const now = Date.now();
     if (now - lastWelcomeSentAt < WELCOME_INTERVAL_MS) return;
@@ -79,22 +77,10 @@ async function handleEvent(event) {
     return client.replyMessage(event.replyToken, welcomeMessages);
   }
 
-    // ✅ ตอบกลับเมื่อพิมพ์บางคำ
+  // ตอบเมื่อพิมพ์ข้อความ
   if (event.type === 'message' && event.message.type === 'text') {
     const msg = event.message.text.toLowerCase();
 
-    // 👉 ตอบจองที่นั่ง
-    if (msg.includes('จองที่นั่ง')) {
-      const groupId = event.source.groupId || 'unknown';
-      const reserveUrl = `https://forest-bot-q28i.onrender.com/reserve?groupId=${groupId}`;
-
-      return client.replyMessage(event.replyToken, {
-        type: 'text',
-        text: `ลิงก์จองที่นั่งของกลุ่มนี้ครับพี่ๆ 🪑👇\n${reserveUrl}`
-      });
-    }
-
-    // 👉 ตอบเรสมาลาพี่ๆ
     if (msg.includes('เรสมาลาพี่ๆ')) {
       const byeMessages = [
         {
@@ -106,12 +92,21 @@ async function handleEvent(event) {
           text: `สุดท้ายขออนุญาตฝากช่องทาง ติดตามทริปสนุกๆได้อีกค้าบบ🙏\n\nFacebook\nhttps://www.facebook.com/share/18yHSFRJqu/\nTiktok\nhttps://www.tiktok.com/@withfriends81?_t=ZS-8tfHqKHDF8y&_r=1\nInstagram\nhttps://www.instagram.com/journeywithfriends.official?igsh=OW94bDk4bjJicm1h\nOpenChat\nhttps://line.me/ti/g2/rXXHCjIASRf_-NG86jcF7vdWUKid1ggcGiufqQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default`
         }
       ];
-
       return client.replyMessage(event.replyToken, byeMessages);
     }
-  }
 
-// ✅ Start Server
+    // ✅ คำว่า "จองที่นั่ง"
+    if (msg.includes('จองที่นั่ง')) {
+      const groupId = event.source.groupId || 'unknown';
+      return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: `📌 จองที่นั่งได้ที่นี่เลยฮะ 👇\nhttps://baitong0610.github.io/forest-bot/?groupId=${groupId}`
+      });
+    }
+  }
+}
+
+// Start Server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`🌳 Forest bot running on port ${port}`);
