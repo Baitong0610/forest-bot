@@ -62,11 +62,11 @@
       cursor: not-allowed;
     }
 
-      .button-container {
+    .button-container {
       position: relative;
-      top: -220px; /* ย้ายขึ้นจากเดิม */
-      z-index: 10; /* ให้ปุ่มอยู่บนสุด */
-    }    }
+      top: -220px;
+      z-index: 10;
+    }
 
     .confirm-btn, .reset-btn {
       padding: 10px 20px;
@@ -110,10 +110,10 @@
   </div>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwSYA8BR2JxAu1WDPP7UmZB8qbSVY2GdFngtRwEQf5rxfyZM-HhUz4-o_CEzJ2XX1W75w/exec";
+    const scriptURL = "https://forest-bot-q28i.onrender.com/reserve"; // ใช้ backend ของตองบน Render
     const seatButtons = document.querySelectorAll('.seat-button');
     const urlParams = new URLSearchParams(window.location.search);
-    const groupId = urlParams.get('group');
+    const groupId = urlParams.get('group') || "default"; // กันพังถ้าไม่มี group
 
     seatButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -147,7 +147,14 @@
         try {
           const res = await fetch(scriptURL, {
             method: "POST",
-            body: new URLSearchParams({ seat, name, groupId })
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              seat,
+              name,
+              groupId
+            })
           });
 
           const result = await res.json();
