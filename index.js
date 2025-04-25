@@ -1,6 +1,7 @@
 const express = require('express');
 const line = require('@line/bot-sdk');
 
+// 🛠️ LINE Bot config
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.CHANNEL_SECRET
@@ -9,11 +10,35 @@ const config = {
 const app = express();
 const client = new line.Client(config);
 
-// ✅ เพิ่ม route นี้เพื่อให้ render ใช้งานหน้าหลักได้
+// ✅ Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// ✅ Test route
 app.get('/', (req, res) => {
   res.send('OK');
 });
 
+// ✅ Memory-based booking store (จำข้อมูลไว้ชั่วคราว รีสตาร์ทแล้วหาย)
+const bookedSeats = {};
+
+// ✅ Seat reservation route
+app.post('/reserve', (req, res) => {
+  const { seat, name, groupId } = req.body;
+
+  if (!seat || !name) {
+    return res.status(400).json({ status: "error", message: "ข้อมูลไม่ครบ" });
+  }
+
+  if (bookedSeats[seat]) {
+    return res.json({ status: "error", message: `ที่นั่ง ${seat} ถูกจองไปแล้ว` });
+  }
+
+  bookedSeats[seat] = { name, groupId };
+  return res.json({ status: "success", message: `จองที่นั่ง ${seat} สำเร็จ` });
+});
+
+// ✅ LINE Webhook
 let lastWelcomeSentAt = 0;
 const WELCOME_INTERVAL_MS = 5 * 1000;
 
@@ -30,11 +55,10 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
 async function handleEvent(event) {
   if (!event.replyToken) return Promise.resolve(null);
 
-  // เมื่อมีสมาชิกเข้ากลุ่ม
+  // ✅ ต้อนรับสมาชิกใหม่
   if (event.type === 'memberJoined') {
     const now = Date.now();
     if (now - lastWelcomeSentAt < WELCOME_INTERVAL_MS) {
-      console.log('ข้ามการตอบ เพราะส่งไปเมื่อไม่นานนี้');
       return;
     }
     lastWelcomeSentAt = now;
@@ -46,7 +70,7 @@ async function handleEvent(event) {
       },
       {
         type: 'text',
-        text: `📌 พี่ๆกรอกข้อมูลสำคัญให้เรสหน่อยน้า ที่ลิงก์นี้ 👇\nhttps://forms.gle/gXcRn9nyWiSxEp8E7\nเรสจะเก็บข้อมูลไว้ทำประกันและ Take Care พี่ๆ 💚\n\nถ้าพี่ท่านไหนไม่สะดวกกรอกทางลิงก์ที่เรสแจ้ง\nทักส่วนตัวหาพี่ใบตอง พี่ใหม่ หรือพี่ปอได้ฮะ`
+        text: `📌 พี่ๆกรอกข้อมูลสำคัญให้เรสหน่อยน้า ที่ลิงก์นี้ 👇\nhttps://forms.gle/gXcRn9nyWiSxEp8E7`
       },
       {
         type: 'image',
@@ -58,30 +82,30 @@ async function handleEvent(event) {
     return client.replyMessage(event.replyToken, welcomeMessages);
   }
 
-  // กรณีมีข้อความเข้ามา
+  // ✅ ตอบข้อความ
   if (event.type === 'message' && event.message.type === 'text') {
-    const userMessage = event.message.text.toLowerCase();
+    const msg = event.message.text.toLowerCase();
 
-    if (userMessage.includes('เรสมาลาพี่ๆ')) {
-      const replyMessages = [
+    if (msg.includes('เรสมาลาพี่ๆ')) {
+      const reply = [
         {
           type: 'text',
-          text: `เรสมาลาพี่ๆ \nขอบคุณ❤️พี่ๆทุกท่านที่เลือกเดินทางกับเพจเที่ยวกับเพื่อน Journey with friends\nให้พี่สตาฟได้ดูแลและเดินทางด้วยในครั้งนี้ฮะ\n\nเรสขอรบกวนพี่ทำแบบประเมินให้หน่อยฮะ ลิงก์นี้ 👇\nhttps://forms.gle/dxqYAu2Mg5VSjyLL8\nเรสจะนำไปเป็นกำลังใจและปรับปรุงทริปถัดไป 🦦🙏`
+          text: `เรสมาลาพี่ๆ \nขอบคุณ❤️พี่ๆทุกท่านที่เลือกเดินทางกับเพจเที่ยวกับเพื่อน Journey with friends`
         },
         {
           type: 'text',
-          text: `สุดท้ายขออนุญาตฝากช่องทาง ติดตามทริปสนุกๆได้อีกค้าบบ🙏\n\nFacebook\nhttps://www.facebook.com/share/18yHSFRJqu/\nTiktok\nhttps://www.tiktok.com/@withfriends81?_t=ZS-8tfHqKHDF8y&_r=1\nInstagram\nhttps://www.instagram.com/journeywithfriends.official?igsh=OW94bDk4bjJicm1h\nOpenChat\nhttps://line.me/ti/g2/rXXHCjIASRf_-NG86jcF7vdWUKid1ggcGiufqQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default`
+          text: `สุดท้ายขออนุญาตฝากช่องทาง ติดตามทริปสนุกๆได้อีกค้าบบ 🙏\nFacebook: https://www.facebook.com/share/18yHSFRJqu/\nTiktok: https://www.tiktok.com/@withfriends81\nIG: https://www.instagram.com/journeywithfriends.official`
         }
       ];
-
-      return client.replyMessage(event.replyToken, replyMessages);
+      return client.replyMessage(event.replyToken, reply);
     }
   }
 
   return Promise.resolve(null);
 }
 
+// ✅ Start server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`LINE bot listening on port ${port}`);
+  console.log(`LINE bot + seat reservation running on port ${port}`);
 });
