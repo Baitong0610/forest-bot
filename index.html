@@ -110,10 +110,11 @@
   </div>
 
   <script>
-    const scriptURL = "https://forest-bot-q28i.onrender.com/reserve"; // ใช้ backend ของตองบน Render
+    const scriptURL = "https://forest-bot-q28i.onrender.com/reserve"; // backend URL ของคุณ
     const seatButtons = document.querySelectorAll('.seat-button');
     const urlParams = new URLSearchParams(window.location.search);
-    const groupId = urlParams.get('group') || "default"; // กันพังถ้าไม่มี group
+    const groupId = urlParams.get('group') || "default";
+    const userId = urlParams.get('userId'); // ✅ ดึง userId จาก URL เช่น ?userId=abc123
 
     seatButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -132,6 +133,11 @@
     }
 
     async function confirmBooking() {
+      if (!userId) {
+        alert("⛔ ไม่พบ userId กรุณาเปิดลิงก์จาก LINE เท่านั้น");
+        return;
+      }
+
       const selected = document.querySelectorAll('.seat-button.selected');
       if (selected.length === 0) {
         alert("กรุณาเลือกที่นั่งก่อนค่ะ");
@@ -142,7 +148,7 @@
       if (!name) return;
 
       for (const btn of selected) {
-        const seat = btn.dataset.seat;
+        const seatNumber = btn.dataset.seat;
 
         try {
           const res = await fetch(scriptURL, {
@@ -151,7 +157,8 @@
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              seat,
+              userId,
+              seatNumber,
               name,
               groupId
             })
