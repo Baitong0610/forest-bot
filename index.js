@@ -2,9 +2,11 @@ const express = require('express');
 const line = require('@line/bot-sdk');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { google } = require('googleapis'); // เพิ่ม
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.json()); // ย้ายมาใช้ตรงนี้เลย ไม่ต้องแยกเฉพาะ /reserve
 
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
@@ -12,6 +14,19 @@ const config = {
 };
 
 const client = new line.Client(config);
+
+// --- Google Sheets Setup ---
+const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+const auth = new google.auth.GoogleAuth({
+  credentials: credentials,
+  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+});
+const sheets = google.sheets({ version: 'v4', auth });
+
+// Spreadsheet ID ของคุณ
+const SPREADSHEET_ID = 'ใส่ไอดีชีทตรงนี้'; // <-- อย่าลืมเปลี่ยนนะ
+
+// --- Routes ---
 
 // หน้าหลัก
 app.get('/', (req, res) => {
@@ -31,7 +46,7 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
 });
 
 // จองที่นั่ง
-app.post('/reserve', bodyParser.json(), async (req, res) => {
+app.post('/reserve', async (req, res) => {
   const { userId, seatNumber, groupId } = req.body;
 
   if (!userId || !seatNumber || !groupId) {
@@ -40,12 +55,28 @@ app.post('/reserve', bodyParser.json(), async (req, res) => {
 
   console.log(`📌 Group ${groupId}: User ${userId} จองที่นั่งหมายเลข ${seatNumber}`);
 
-  // 🔜 ต่อไปจะบันทึก Google Sheets
+  try {
+    const timestamp = new Date().toISOString();
 
-  res.json({ message: `✅ จองที่นั่ง ${seatNumber} เรียบร้อยในกลุ่ม ${groupId}` });
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: SPREADSHEET_ID,
+      range: 'Reservations!A1', // ต้องมีชีทชื่อ Reservations
+      valueInputOption: 'USER_ENTERED',
+      requestBody: {
+        values: [
+          [timestamp, groupId, userId, seatNumber],
+        ],
+      },
+    });
+
+    res.json({ message: `✅ จองที่นั่ง ${seatNumber} เรียบร้อยในกลุ่ม ${groupId}` });
+  } catch (error) {
+    console.error("❌ Error writing to Google Sheets:", error);
+    res.status(500).json({ message: '❌ Failed to save reservation' });
+  }
 });
 
-// Event Handler
+// --- Event Handler ---
 let lastWelcomeSentAt = 0;
 const WELCOME_INTERVAL_MS = 5 * 1000;
 
@@ -106,7 +137,7 @@ async function handleEvent(event) {
   }
 }
 
-// Start Server
+// --- Start Server ---
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`🌳 Forest bot running on port ${port}`);
