@@ -2,12 +2,13 @@ const express = require('express');
 const line = require('@line/bot-sdk');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { google } = require('googleapis'); // เพิ่ม
+const { google } = require('googleapis'); // สำหรับเชื่อม Google Sheets
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json()); // ย้ายมาใช้ตรงนี้เลย ไม่ต้องแยกเฉพาะ /reserve
+app.use(bodyParser.json()); // ใช้ body-parser รวม
 
+// --- LINE Bot Config ---
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.CHANNEL_SECRET
@@ -16,15 +17,15 @@ const config = {
 const client = new line.Client(config);
 
 // --- Google Sheets Setup ---
-const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+const credentials = JSON.parse(Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_JSON, 'base64').toString('utf8'));
 const auth = new google.auth.GoogleAuth({
   credentials: credentials,
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 const sheets = google.sheets({ version: 'v4', auth });
 
-// Spreadsheet ID ของคุณ
-const SPREADSHEET_ID = 'ใส่ไอดีชีทตรงนี้'; // <-- อย่าลืมเปลี่ยนนะ
+// Spreadsheet ID ของคุณ (เปลี่ยนตรงนี้)
+const SPREADSHEET_ID = '1XE07lRz6ZsXa6TELNH61I9pwsGXWfgmso3_2HxSFP60/edit?gid=0#gid=0'; // <-- ต้องใส่ ID Spreadsheet จริงๆ
 
 // --- Routes ---
 
