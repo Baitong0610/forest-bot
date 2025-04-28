@@ -2,13 +2,12 @@ const express = require('express');
 const line = require('@line/bot-sdk');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { google } = require('googleapis'); // สำหรับเชื่อม Google Sheets
+const { google } = require('googleapis');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json()); // ใช้ body-parser รวม
+app.use(bodyParser.json());
 
-// --- LINE Bot Config ---
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.CHANNEL_SECRET
@@ -24,18 +23,15 @@ const auth = new google.auth.GoogleAuth({
 });
 const sheets = google.sheets({ version: 'v4', auth });
 
-// Spreadsheet ID ของคุณ (เปลี่ยนตรงนี้)
-const SPREADSHEET_ID = '1XE07lRz6ZsXa6TELNH61I9pwsGXWfgmso3_2HxSFP60/edit?gid=0#gid=0'; // <-- ต้องใส่ ID Spreadsheet จริงๆ
+// 🔥 แก้ SPREADSHEET_ID ให้ถูกต้อง
+const SPREADSHEET_ID = '1XE07lRz6ZsXa6TELNH61I9pwsGXWfgmso3_2HxSFP60';
 
 // --- Routes ---
-
-// หน้าหลัก
 app.get('/', (req, res) => {
   console.log("✅ GET / hit!");
   res.send('🌳 Forest Bot is running!');
 });
 
-// Webhook จาก LINE
 app.post('/webhook', line.middleware(config), async (req, res) => {
   try {
     await Promise.all(req.body.events.map(handleEvent));
@@ -46,7 +42,6 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
   }
 });
 
-// จองที่นั่ง
 app.post('/reserve', async (req, res) => {
   const { userId, seatNumber, groupId } = req.body;
 
@@ -61,7 +56,7 @@ app.post('/reserve', async (req, res) => {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: 'Reservations!A1', // ต้องมีชีทชื่อ Reservations
+      range: 'Reservations!A1',
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values: [
@@ -84,7 +79,6 @@ const WELCOME_INTERVAL_MS = 5 * 1000;
 async function handleEvent(event) {
   if (!event.replyToken) return;
 
-  // ต้อนรับสมาชิกใหม่
   if (event.type === 'memberJoined') {
     const now = Date.now();
     if (now - lastWelcomeSentAt < WELCOME_INTERVAL_MS) return;
@@ -109,7 +103,6 @@ async function handleEvent(event) {
     return client.replyMessage(event.replyToken, welcomeMessages);
   }
 
-  // ตอบเมื่อพิมพ์ข้อความ
   if (event.type === 'message' && event.message.type === 'text') {
     const msg = event.message.text.toLowerCase();
 
@@ -127,7 +120,6 @@ async function handleEvent(event) {
       return client.replyMessage(event.replyToken, byeMessages);
     }
 
-    // ✅ คำว่า "จองที่นั่ง"
     if (msg.includes('จองที่นั่ง')) {
       const groupId = event.source.groupId || 'unknown';
       return client.replyMessage(event.replyToken, {
