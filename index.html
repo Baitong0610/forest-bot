@@ -112,7 +112,9 @@
           liff.login();
         } else {
           const context = liff.getContext();
+          console.log("LIFF Context:", context);  // แสดงข้อมูลทั้งหมดใน console
           groupId = context.type === "group" ? context.groupId : "unknown";
+          console.log("Group ID:", groupId);  // ตรวจสอบว่า groupId ถูกดึงมาอย่างถูกต้องหรือไม่
           return liff.getProfile();
         }
       })
