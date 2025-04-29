@@ -112,7 +112,7 @@
           liff.login();
         } else {
           const context = liff.getContext();
-          groupId = context.groupId || "default";
+          groupId = context.type === "group" ? context.groupId : "unknown";
           return liff.getProfile();
         }
       })
