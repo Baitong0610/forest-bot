@@ -2,12 +2,10 @@ const express = require('express');
 const line = require('@line/bot-sdk');
 const cors = require('cors');
 const getRawBody = require('raw-body');
-const bodyParser = require('body-parser');
 const { google } = require('googleapis');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
 
 // --- LINE Config ---
 const config = {
@@ -63,26 +61,23 @@ app.get('/', (req, res) => {
 });
 
 // --- LINE Webhook ---
-app.post('/webhook', async (req, res) => {
-  try {
-    const buf = await getRawBody(req, {
-      length: req.headers['content-length'],
-      limit: '1mb',
-      encoding: req.headers['content-encoding'] || 'utf-8',
+app.post('/webhook', (req, res, next) => {
+  getRawBody(req)
+    .then((buf) => {
+      req.rawBody = buf;
+      next();
+    })
+    .catch((err) => {
+      console.error('❌ Raw body error:', err);
+      res.status(400).send('Invalid body');
     });
-
-    const signature = req.headers['x-line-signature'];
-    if (!line.validateSignature(buf, config.channelSecret, signature)) {
-      console.error('❌ Invalid signature');
-      return res.status(401).send('Invalid signature');
-    }
-
-    const body = JSON.parse(buf.toString());
-    await Promise.all(body.events.map(handleEvent));
-    res.status(200).send('OK');
-  } catch (err) {
-    console.error('❌ Webhook error:', err);
-    res.status(400).send('Bad Request');
+}, line.middleware(config), async (req, res) => {
+  try {
+    await Promise.all(req.body.events.map(handleEvent));
+    res.status(200).end();
+  } catch (error) {
+    console.error('❌ Error in /webhook:', error);
+    res.status(500).end();
   }
 });
 
@@ -118,7 +113,7 @@ async function handleEvent(event) {
 }
 
 // --- Reserve Seat ---
-app.post('/reserve', async (req, res) => {
+app.post('/reserve', express.json(), async (req, res) => {
   const { userId, seatNumber, name, groupId } = req.body;
   if (!userId || !seatNumber || !groupId || !name) {
     return res.status(400).json({ message: '❌ Missing required fields' });
