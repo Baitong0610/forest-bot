@@ -33,7 +33,9 @@ function sanitizeSheetName(name, fallbackId) {
 // --- ดึงชื่อกลุ่ม หรือ fallback เป็น groupId ---
 async function getSheetNameFromGroup(groupId) {
   try {
+    console.log('📥 กำลังดึงชื่อกลุ่มจาก groupId:', groupId);
     const summary = await client.getGroupSummary(groupId);
+    console.log('✅ groupName ที่ได้:', summary.groupName);
     return sanitizeSheetName(summary.groupName, groupId);
   } catch (err) {
     console.warn('⚠️ ดึงชื่อกลุ่มไม่ได้ ใช้ groupId แทน:', err.message);
