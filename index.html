@@ -13,18 +13,15 @@
       margin: 0;
       padding: 0;
     }
-
     h1 {
       margin-top: 30px;
       color: #222;
     }
-
     p {
       margin-top: -10px;
       font-weight: bold;
       color: #444;
     }
-
     .seat-map {
       background-image: url("resized-bus-seat-map.png");
       background-size: contain;
@@ -35,7 +32,6 @@
       margin: 30px auto 10px auto;
       border-radius: 10px;
     }
-
     .seat-button {
       position: absolute;
       width: 50px;
@@ -47,28 +43,23 @@
       font-weight: bold;
       transition: 0.2s;
     }
-
     .seat-button:hover {
       transform: scale(1.1);
     }
-
     .seat-button.selected {
       background-color: #52b788;
       color: white;
     }
-
     .seat-button.taken {
       background-color: #ccc;
       color: #333;
       cursor: not-allowed;
     }
-
     .button-container {
       position: relative;
       top: -220px;
       z-index: 10;
     }
-
     .confirm-btn, .reset-btn {
       padding: 10px 20px;
       border: none;
@@ -77,12 +68,10 @@
       font-weight: bold;
       cursor: pointer;
     }
-
     .confirm-btn {
       background-color: #52b788;
       color: white;
     }
-
     .reset-btn {
       background-color: #6c757d;
       color: white;
@@ -114,19 +103,19 @@
     const scriptURL = "https://forest-bot-q28i.onrender.com/reserve";
     const seatButtons = document.querySelectorAll('.seat-button');
     const urlParams = new URLSearchParams(window.location.search);
-    const groupId = urlParams.get('group') || "default";
+    const groupId = urlParams.get('groupId') || "default";
     let userId = null;
 
-    liff
-      .init({ liffId: "2007340469-1rzdNJ5k" })
+    liff.init({ liffId: "2007340469-1rzdNJ5k" })
       .then(() => {
         if (!liff.isLoggedIn()) {
           liff.login();
         } else {
-          liff.getProfile().then(profile => {
-            userId = profile.userId;
-          });
+          return liff.getProfile();
         }
+      })
+      .then(profile => {
+        userId = profile.userId;
       })
       .catch(err => {
         alert("LIFF Error: " + err);
@@ -182,7 +171,7 @@
           });
 
           const result = await res.json();
-          if (result.status === "success") {
+          if (result.message.includes("✅")) {
             btn.textContent = name;
             btn.classList.remove('selected');
             btn.classList.add('taken');
@@ -198,9 +187,3 @@
   </script>
 </body>
 </html>
-"""
-
-with open("/mnt/data/index.html", "w", encoding="utf-8") as f:
-    f.write(html_code)
-
-"/mnt/data/index.html"
