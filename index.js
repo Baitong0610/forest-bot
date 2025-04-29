@@ -14,7 +14,7 @@ const config = {
 
 const client = new line.Client(config);
 
-// --- Google Sheets Setup ---
+// Google Sheets Auth
 const credentials = JSON.parse(Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_JSON, 'base64').toString('utf8'));
 const auth = new google.auth.GoogleAuth({
   credentials: credentials,
@@ -22,16 +22,14 @@ const auth = new google.auth.GoogleAuth({
 });
 const sheets = google.sheets({ version: 'v4', auth });
 
-// Spreadsheet ID
 const SPREADSHEET_ID = '1XE07lRz6ZsXa6TELNH61I9pwsGXWfgmso3_2HxSFP60';
 
-// --- Home Route ---
+// Home route
 app.get('/', (req, res) => {
-  console.log("✅ GET / hit!");
   res.send('🌳 Forest Bot is running!');
 });
 
-// --- Webhook from LINE (อย่าใส่ bodyParser ก่อนหน้านี้) ---
+// LINE Webhook
 app.post('/webhook', line.middleware(config), async (req, res) => {
   try {
     await Promise.all(req.body.events.map(handleEvent));
@@ -42,15 +40,15 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
   }
 });
 
-// --- Reserve Seat (ใส่ bodyParser.json() แค่เฉพาะจุดนี้) ---
+// Seat Reservation
 app.post('/reserve', bodyParser.json(), async (req, res) => {
-  const { userId, seatNumber, groupId } = req.body;
+  const { userId, seatNumber, groupId, name } = req.body;
 
-  if (!userId || !seatNumber || !groupId) {
-    return res.status(400).json({ message: '❌ Missing userId, seatNumber, or groupId' });
+  if (!userId || !seatNumber || !groupId || !name) {
+    return res.status(400).json({ message: '❌ Missing data (userId, seatNumber, name, groupId)' });
   }
 
-  console.log(`📌 Group ${groupId}: User ${userId} จองที่นั่งหมายเลข ${seatNumber}`);
+  console.log(`📌 Group ${groupId}: ${name} (${userId}) จองที่นั่ง ${seatNumber}`);
 
   try {
     const timestamp = new Date().toISOString();
@@ -60,90 +58,73 @@ app.post('/reserve', bodyParser.json(), async (req, res) => {
       range: 'Reservations!A1',
       valueInputOption: 'USER_ENTERED',
       requestBody: {
-        values: [[timestamp, groupId, userId, seatNumber]],
+        values: [[timestamp, groupId, userId, name, seatNumber]],
       },
     });
 
-    res.json({ message: `✅ จองที่นั่ง ${seatNumber} เรียบร้อยในกลุ่ม ${groupId}` });
+    res.json({ message: `✅ จองที่นั่ง ${seatNumber} เรียบร้อย` });
   } catch (error) {
-    console.error("❌ Error writing to Google Sheets:", error);
-    res.status(500).json({ message: '❌ Failed to save reservation' });
+    console.error("❌ Google Sheets Error:", error);
+    res.status(500).json({ message: '❌ บันทึกข้อมูลไม่สำเร็จ' });
   }
 });
 
-// --- Event Handler ---
+// Handle LINE events
 let lastWelcomeSentAt = 0;
 const WELCOME_INTERVAL_MS = 5 * 1000;
 
 async function handleEvent(event) {
-  try {
-    if (!event || !event.type) {
-      console.warn("⚠️ event ไม่มีข้อมูล:", event);
-      return;
-    }
+  if (!event || !event.type) return;
 
-    if (!event.replyToken || event.replyToken === "00000000000000000000000000000000" || event.replyToken === "ffffffffffffffffffffffffffffffff") {
-      console.log("🚫 Event นี้ไม่ต้อง reply:", event);
-      return;
-    }
+  if (event.type === 'memberJoined') {
+    const now = Date.now();
+    if (now - lastWelcomeSentAt < WELCOME_INTERVAL_MS) return;
+    lastWelcomeSentAt = now;
 
-    // Welcome new member
-    if (event.type === 'memberJoined') {
-      const now = Date.now();
-      if (now - lastWelcomeSentAt < WELCOME_INTERVAL_MS) return;
-      lastWelcomeSentAt = now;
+    const welcomeMessages = [
+      {
+        type: 'text',
+        text: `สวัสดีฮะ พี่ๆ นักท่องเที่ยวที่เพิ่งเข้ามา\nผมชื่อ Forest หรือเรียก Rest ก็ได้ฮะ ผมเป็นตัวแทนของเพจเที่ยวกับเพื่อน ❤️`
+      },
+      {
+        type: 'text',
+        text: `📌 พี่ๆกรอกข้อมูลสำคัญให้เรสหน่อยน้า ที่ลิงก์นี้ 👇\nhttps://forms.gle/gXcRn9nyWiSxEp8E7`
+      },
+      {
+        type: 'image',
+        originalContentUrl: 'https://i.imgur.com/g8mt5OP.jpeg',
+        previewImageUrl: 'https://i.imgur.com/g8mt5OP.jpeg'
+      }
+    ];
+    return client.replyMessage(event.replyToken, welcomeMessages);
+  }
 
-      const welcomeMessages = [
+  if (event.type === 'message' && event.message.type === 'text') {
+    const msg = event.message.text.toLowerCase();
+    if (msg.includes('เรสมาลาพี่ๆ')) {
+      return client.replyMessage(event.replyToken, [
         {
           type: 'text',
-          text: `สวัสดีฮะ พี่ๆ นักท่องเที่ยวที่เพิ่งเข้ามา\nผมชื่อ Forest หรือเรียก Rest ก็ได้ฮะ ผมเป็นตัวแทนของเพจเที่ยวกับเพื่อน ❤️`
+          text: `เรสมาลาพี่ๆ \nขอบคุณ❤️พี่ๆทุกท่านที่เลือกเดินทางกับเพจเที่ยวกับเพื่อน\n\nแบบประเมินทริป 👇\nhttps://forms.gle/dxqYAu2Mg5VSjyLL8`
         },
         {
           type: 'text',
-          text: `📌 พี่ๆกรอกข้อมูลสำคัญให้เรสหน่อยน้า ที่ลิงก์นี้ 👇\nhttps://forms.gle/gXcRn9nyWiSxEp8E7\nเรสจะเก็บข้อมูลไว้ทำประกันและ Take Care พี่ๆ 💚`
-        },
-        {
-          type: 'image',
-          originalContentUrl: 'https://i.imgur.com/g8mt5OP.jpeg',
-          previewImageUrl: 'https://i.imgur.com/g8mt5OP.jpeg'
+          text: `ติดตามช่องทางของเราได้ที่ 👇\nFB: https://facebook.com/share/18yHSFRJqu/\nTiktok: https://www.tiktok.com/@withfriends81\nIG: https://instagram.com/journeywithfriends.official\nOpenChat: https://line.me/ti/g2/rXXHCjIASRf_-NG86jcF7vdWUKid1ggcGiufqQ`
         }
-      ];
-
-      return client.replyMessage(event.replyToken, welcomeMessages);
+      ]);
     }
 
-    // Handle text message
-    if (event.type === 'message' && event.message.type === 'text') {
-      const msg = event.message.text.toLowerCase();
-
-      if (msg.includes('เรสมาลาพี่ๆ')) {
-        const byeMessages = [
-          {
-            type: 'text',
-            text: `เรสมาลาพี่ๆ \nขอบคุณ❤️พี่ๆทุกท่านที่เลือกเดินทางกับเพจเที่ยวกับเพื่อน Journey with friends\nให้พี่สตาฟได้ดูแลและเดินทางด้วยในครั้งนี้ฮะ\n\nเรสขอรบกวนพี่ทำแบบประเมินให้หน่อยฮะ ลิงก์นี้ 👇\nhttps://forms.gle/dxqYAu2Mg5VSjyLL8`
-          },
-          {
-            type: 'text',
-            text: `สุดท้ายขออนุญาตฝากช่องทาง ติดตามทริปสนุกๆได้อีกค้าบบ🙏\n\nFacebook\nhttps://www.facebook.com/share/18yHSFRJqu/\nTiktok\nhttps://www.tiktok.com/@withfriends81?_t=ZS-8tfHqKHDF8y&_r=1\nInstagram\nhttps://www.instagram.com/journeywithfriends.official?igsh=OW94bDk4bjJicm1h\nOpenChat\nhttps://line.me/ti/g2/rXXHCjIASRf_-NG86jcF7vdWUKid1ggcGiufqQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default`
-          }
-        ];
-        return client.replyMessage(event.replyToken, byeMessages);
-      }
-
-      if (msg.includes('จองที่นั่ง')) {
-        const groupId = event.source.groupId || 'unknown';
-        return client.replyMessage(event.replyToken, {
-          type: 'text',
-          text: `📌 จองที่นั่งได้ที่นี่เลยฮะ 👇\nhttps://baitong0610.github.io/forest-bot/?groupId=${groupId}`
-        });
-      }
+    if (msg.includes('จองที่นั่ง')) {
+      const groupId = event.source.groupId || 'unknown';
+      return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: `📌 จองที่นั่งได้ที่นี่เลยฮะ 👇\nhttps://baitong0610.github.io/forest-bot/?groupId=${groupId}`
+      });
     }
-  } catch (error) {
-    console.error("❌ Error in handleEvent:", error);
   }
 }
 
-// --- Start Server ---
+// Start server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`🌳 Forest bot running on port ${port}`);
