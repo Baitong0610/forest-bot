@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>เลือกที่นั่ง</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
       font-family: 'Kanit', sans-serif;
@@ -120,7 +121,7 @@
         loadSeats();
       })
       .catch(err => {
-        alert("LIFF Error: " + err);
+        Swal.fire("LIFF Error", err.message, "error");
         console.error(err);
       });
 
@@ -138,7 +139,9 @@
       try {
         const res = await fetch(`${seatsURL}?groupId=${groupId}`);
         const data = await res.json();
-        data.forEach(row => {
+        if (!data || !data.seats) return;
+
+        data.seats.forEach(row => {
           const btn = document.getElementById(row.seatNumber);
           if (btn) {
             btn.textContent = row.name;
@@ -160,17 +163,25 @@
 
     async function confirmBooking() {
       if (!userId) {
-        alert("⛔ ไม่สามารถดึง userId ได้ กรุณาเปิดจาก LINE อีกครั้ง");
+        Swal.fire("เกิดข้อผิดพลาด", "⛔ ไม่สามารถดึง userId ได้ กรุณาเปิดจาก LINE อีกครั้ง", "error");
         return;
       }
 
       const selected = document.querySelectorAll('.seat-button.selected');
       if (selected.length === 0) {
-        alert("กรุณาเลือกที่นั่งก่อนค่ะ");
+        Swal.fire("กรุณาเลือกที่นั่ง", "", "warning");
         return;
       }
 
-      const name = prompt("กรุณากรอกชื่อของคุณเพื่อจองที่นั่งค่ะ:");
+      const { value: name } = await Swal.fire({
+        title: "กรุณากรอกชื่อของคุณ",
+        input: "text",
+        inputPlaceholder: "ชื่อของคุณ",
+        showCancelButton: true,
+        confirmButtonText: "ยืนยัน",
+        cancelButtonText: "ยกเลิก"
+      });
+
       if (!name) return;
 
       for (const btn of selected) {
@@ -178,15 +189,8 @@
         try {
           const res = await fetch(scriptURL, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              userId,
-              seatNumber,
-              groupId,
-              name
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, seatNumber, groupId, name })
           });
 
           const result = await res.json();
@@ -195,13 +199,15 @@
             btn.classList.remove('selected');
             btn.classList.add('taken');
           } else {
-            alert("❌ " + result.message);
+            Swal.fire("ไม่สำเร็จ", result.message, "error");
           }
         } catch (err) {
-          alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+          Swal.fire("เกิดข้อผิดพลาด", "กรุณาลองใหม่อีกครั้ง", "error");
           console.error(err);
         }
       }
+
+      Swal.fire("สำเร็จ", "จองที่นั่งสำเร็จแล้ว", "success");
     }
   </script>
 </body>
