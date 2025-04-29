@@ -1,3 +1,6 @@
+# Save the complete updated HTML content into a downloadable file
+
+html_content = """
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -103,16 +106,21 @@
     const scriptURL = "https://forest-bot-q28i.onrender.com/reserve";
     const seatsURL = "https://forest-bot-q28i.onrender.com/seats";
     let userId = null;
+    let groupId = null;
 
     liff.init({ liffId: "2007340469-1rzdNJ5k" })
       .then(() => {
         if (!liff.isLoggedIn()) {
           liff.login();
         } else {
-          liff.getProfile().then(profile => {
-            userId = profile.userId;
-          });
+          const context = liff.getContext();
+          groupId = context.groupId || "unknown";
+          return liff.getProfile();
         }
+      })
+      .then(profile => {
+        userId = profile.userId;
+        loadSeats();
       })
       .catch(err => {
         alert("LIFF Error: " + err);
@@ -130,8 +138,10 @@
     }
 
     async function loadSeats() {
+      if (!groupId) return;
+
       try {
-        const res = await fetch(seatsURL);
+        const res = await fetch(`${seatsURL}?groupId=${groupId}`);
         const data = await res.json();
         if (data.status === "success") {
           Object.entries(data.seats).forEach(([seat, name]) => {
@@ -156,8 +166,8 @@
     });
 
     async function confirmBooking() {
-      if (!userId) {
-        alert("⛔ ไม่สามารถดึง userId ได้ กรุณาเปิดจาก LINE อีกครั้ง");
+      if (!userId || !groupId) {
+        alert("⛔ ไม่สามารถดึงข้อมูลผู้ใช้หรือกลุ่มได้ กรุณาเปิดจาก LINE อีกครั้ง");
         return;
       }
 
@@ -181,7 +191,7 @@
             body: JSON.stringify({
               userId,
               seatNumber,
-              groupId: "default",
+              groupId,
               name
             })
           });
@@ -200,10 +210,13 @@
         }
       }
     }
-
-    // โหลดสถานะที่นั่งเมื่อเปิดหน้า
-    loadSeats();
   </script>
 </body>
 </html>
+"""
 
+file_path = "/mnt/data/seat-reservation-v2.html"
+with open(file_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+file_path
