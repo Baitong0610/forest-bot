@@ -1,11 +1,8 @@
-# Save the complete updated HTML content into a downloadable file
-
-html_content = """
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>เลือกที่นั่ง</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
@@ -106,7 +103,7 @@ html_content = """
     const scriptURL = "https://forest-bot-q28i.onrender.com/reserve";
     const seatsURL = "https://forest-bot-q28i.onrender.com/seats";
     let userId = null;
-    let groupId = null;
+    let groupId = "default";
 
     liff.init({ liffId: "2007340469-1rzdNJ5k" })
       .then(() => {
@@ -114,12 +111,12 @@ html_content = """
           liff.login();
         } else {
           const context = liff.getContext();
-          groupId = context.groupId || "unknown";
+          groupId = context.groupId || "default";
           return liff.getProfile();
         }
       })
       .then(profile => {
-        userId = profile.userId;
+        if (profile) userId = profile.userId;
         loadSeats();
       })
       .catch(err => {
@@ -138,20 +135,16 @@ html_content = """
     }
 
     async function loadSeats() {
-      if (!groupId) return;
-
       try {
         const res = await fetch(`${seatsURL}?groupId=${groupId}`);
         const data = await res.json();
-        if (data.status === "success") {
-          Object.entries(data.seats).forEach(([seat, name]) => {
-            const btn = document.getElementById(seat);
-            if (btn) {
-              btn.textContent = name;
-              btn.classList.add('taken');
-            }
-          });
-        }
+        data.forEach(row => {
+          const btn = document.getElementById(row.seatNumber);
+          if (btn) {
+            btn.textContent = row.name;
+            btn.classList.add('taken');
+          }
+        });
       } catch (err) {
         console.error("❌ Error loading seats:", err);
       }
@@ -166,8 +159,8 @@ html_content = """
     });
 
     async function confirmBooking() {
-      if (!userId || !groupId) {
-        alert("⛔ ไม่สามารถดึงข้อมูลผู้ใช้หรือกลุ่มได้ กรุณาเปิดจาก LINE อีกครั้ง");
+      if (!userId) {
+        alert("⛔ ไม่สามารถดึง userId ได้ กรุณาเปิดจาก LINE อีกครั้ง");
         return;
       }
 
@@ -213,10 +206,3 @@ html_content = """
   </script>
 </body>
 </html>
-"""
-
-file_path = "/mnt/data/seat-reservation-v2.html"
-with open(file_path, "w", encoding="utf-8") as f:
-    f.write(html_content)
-
-file_path
