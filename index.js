@@ -1,5 +1,3 @@
-// --- Full Corrected Forest Bot ---
-
 const express = require('express');
 const line = require('@line/bot-sdk');
 const cors = require('cors');
@@ -8,9 +6,7 @@ const { google } = require('googleapis');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
 
-// --- LINE Bot Config ---
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.CHANNEL_SECRET
@@ -26,18 +22,16 @@ const auth = new google.auth.GoogleAuth({
 });
 const sheets = google.sheets({ version: 'v4', auth });
 
-// Spreadsheet ID (Only ID, no /edit etc.)
+// Spreadsheet ID
 const SPREADSHEET_ID = '1XE07lRz6ZsXa6TELNH61I9pwsGXWfgmso3_2HxSFP60';
 
-// --- Routes ---
-
-// Home Page
+// --- Home Route ---
 app.get('/', (req, res) => {
   console.log("✅ GET / hit!");
   res.send('🌳 Forest Bot is running!');
 });
 
-// Webhook from LINE
+// --- Webhook from LINE (อย่าใส่ bodyParser ก่อนหน้านี้) ---
 app.post('/webhook', line.middleware(config), async (req, res) => {
   try {
     await Promise.all(req.body.events.map(handleEvent));
@@ -48,8 +42,8 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
   }
 });
 
-// Reserve Seat
-app.post('/reserve', async (req, res) => {
+// --- Reserve Seat (ใส่ bodyParser.json() แค่เฉพาะจุดนี้) ---
+app.post('/reserve', bodyParser.json(), async (req, res) => {
   const { userId, seatNumber, groupId } = req.body;
 
   if (!userId || !seatNumber || !groupId) {
@@ -88,7 +82,6 @@ async function handleEvent(event) {
       return;
     }
 
-    // Skip test events (from webhook verify)
     if (!event.replyToken || event.replyToken === "00000000000000000000000000000000" || event.replyToken === "ffffffffffffffffffffffffffffffff") {
       console.log("🚫 Event นี้ไม่ต้อง reply:", event);
       return;
