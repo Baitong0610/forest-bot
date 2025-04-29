@@ -1,9 +1,11 @@
-<!DOCTYPE html>
+# Save the updated LIFF-based HTML code with the user's latest version as base
+html_code = """<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>เลือกที่นั่ง</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body {
       font-family: 'Kanit', sans-serif;
@@ -110,11 +112,27 @@
   </div>
 
   <script>
-    const scriptURL = "https://forest-bot-q28i.onrender.com/reserve"; // backend URL ของคุณ
+    const scriptURL = "https://forest-bot-q28i.onrender.com/reserve";
     const seatButtons = document.querySelectorAll('.seat-button');
     const urlParams = new URLSearchParams(window.location.search);
     const groupId = urlParams.get('group') || "default";
-    const userId = urlParams.get('userId'); // ✅ ดึง userId จาก URL เช่น ?userId=abc123
+    let userId = null;
+
+    liff
+      .init({ liffId: "2007340469-1rzdNJ5k" })
+      .then(() => {
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        } else {
+          liff.getProfile().then(profile => {
+            userId = profile.userId;
+          });
+        }
+      })
+      .catch(err => {
+        alert("LIFF Error: " + err);
+        console.error(err);
+      });
 
     seatButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -134,7 +152,7 @@
 
     async function confirmBooking() {
       if (!userId) {
-        alert("⛔ ไม่พบ userId กรุณาเปิดลิงก์จาก LINE เท่านั้น");
+        alert("⛔ ไม่สามารถดึง userId ได้ กรุณาเปิดจาก LINE อีกครั้ง");
         return;
       }
 
@@ -181,3 +199,9 @@
   </script>
 </body>
 </html>
+"""
+
+with open("/mnt/data/index.html", "w", encoding="utf-8") as f:
+    f.write(html_code)
+
+"/mnt/data/index.html"
