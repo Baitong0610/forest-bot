@@ -6,6 +6,7 @@ const { google } = require('googleapis');
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.json());
 
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
@@ -13,7 +14,9 @@ const config = {
 };
 const client = new line.Client(config);
 
-const credentials = JSON.parse(Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_JSON, 'base64').toString('utf8'));
+const credentials = JSON.parse(
+  Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_JSON, 'base64').toString('utf8')
+);
 const auth = new google.auth.GoogleAuth({
   credentials,
   scopes: ['https://www.googleapis.com/auth/spreadsheets']
@@ -31,12 +34,12 @@ app.post('/webhook', line.middleware(config), async (req, res) => {
     await Promise.all(req.body.events.map(handleEvent));
     res.status(200).end();
   } catch (error) {
-    console.error(error);
+    console.error('Webhook Error:', error);
     res.status(500).end();
   }
 });
 
-app.post('/reserve', bodyParser.json(), async (req, res) => {
+app.post('/reserve', async (req, res) => {
   const { userId, seatNumber, name, groupId } = req.body;
 
   if (!userId || !seatNumber || !groupId || !name) {
@@ -60,7 +63,7 @@ app.post('/reserve', bodyParser.json(), async (req, res) => {
 
     res.json({ status: 'success' });
   } catch (error) {
-    console.error(error);
+    console.error('Reserve Error:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
@@ -89,7 +92,7 @@ app.get('/seats', async (req, res) => {
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    console.error('Fetch Seats Error:', error);
     res.status(500).json({ message: 'Failed to fetch seats' });
   }
 });
@@ -114,7 +117,13 @@ async function ensureSheetExists(sheetName) {
 }
 
 async function handleEvent(event) {
-  // Your previous line event handler logic (welcome messages, etc.)
+  if (event.type === 'message' && event.message.type === 'text') {
+    return client.replyMessage(event.replyToken, {
+      type: 'text',
+      text: 'บอททำงานแล้วจ้า 🌲'
+    });
+  }
+  return Promise.resolve(null);
 }
 
 const port = process.env.PORT || 3000;
