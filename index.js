@@ -3,9 +3,16 @@ const line = require('@line/bot-sdk');
 const cors = require('cors');
 const getRawBody = require('raw-body');
 const { google } = require('googleapis');
+const path = require('path');
 
 const app = express();
 app.use(cors());
+
+// --- Serve static files and HTML ---
+app.use(express.static(path.join(__dirname, '/')));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // --- LINE Config ---
 const config = {
@@ -33,7 +40,7 @@ function sanitizeSheetName(name, fallbackId) {
 // --- ตรวจสอบ/สร้างชีต ---
 async function ensureSheetExists() {
   const metadata = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
-  const sheetName = "seats"; // ใช้ชื่อชีตเดียวสำหรับเก็บข้อมูลทั้งหมด
+  const sheetName = "seats";
   const exists = metadata.data.sheets.some(sheet => sheet.properties.title === sheetName);
   if (!exists) {
     await sheets.spreadsheets.batchUpdate({
@@ -105,16 +112,15 @@ app.post('/reserve', express.json(), async (req, res) => {
   }
 
   try {
-    const sheetName = "seats"; // ใช้ชื่อชีตเดียว
+    const sheetName = "seats";
     await ensureSheetExists();
 
     const timestamp = new Date().toISOString();
-    const row = [timestamp, groupId, userId, seatNumber, name]; // เพิ่มข้อมูล groupId ลงไปด้วย
+    const row = [timestamp, groupId, userId, seatNumber, name];
 
-    // เพิ่มข้อมูลใหม่ลงในชีต
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${sheetName}!A1`,  // เพิ่มข้อมูลในชีตเดียว
+      range: `${sheetName}!A1`,
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values: [row],
@@ -134,16 +140,16 @@ app.get('/seats', async (req, res) => {
   if (!groupId) return res.status(400).json({ message: '❌ groupId is required' });
 
   try {
-    const sheetName = "seats"; // ใช้ชื่อชีตเดียว
+    const sheetName = "seats";
     await ensureSheetExists();
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${sheetName}!A:E`,  // ดึงข้อมูลทั้งหมดในชีต
+      range: `${sheetName}!A:E`,
     });
 
     const rows = response.data.values || [];
-    const seats = rows.filter(row => row[1] === groupId).map(row => ({  // กรองข้อมูลตาม groupId
+    const seats = rows.filter(row => row[1] === groupId).map(row => ({
       timestamp: row[0],
       groupId: row[1],
       userId: row[2],
