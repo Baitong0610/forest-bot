@@ -138,6 +138,11 @@
     }
 
     async function loadSeats() {
+      if (groupId === "unknown") {
+        Swal.fire("เกิดข้อผิดพลาด", "⛔ กรุณาเปิดจากกลุ่ม LINE เพื่อทำการจองที่นั่ง", "error");
+        return;
+      }
+
       try {
         const res = await fetch(`${seatsURL}?groupId=${groupId}`);
         const data = await res.json();
