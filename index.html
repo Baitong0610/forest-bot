@@ -104,23 +104,32 @@
     const scriptURL = "https://forest-bot-q28i.onrender.com/reserve";
     const seatsURL = "https://forest-bot-q28i.onrender.com/seats";
     let userId = null;
-    let groupId = "default";
+    let groupId = "unknown";
 
+    // เริ่มต้นการตั้งค่า LIFF
     liff.init({ liffId: "2007340469-1rzdNJ5k" })
       .then(() => {
+        // ตรวจสอบว่า login หรือยัง
         if (!liff.isLoggedIn()) {
-          liff.login();
+          liff.login(); // ถ้ายังไม่ login ให้เข้าไป login
         } else {
-          const context = liff.getContext();
+          const context = liff.getContext();  // ดึงข้อมูล context
           console.log("LIFF Context:", context);  // แสดงข้อมูลทั้งหมดใน console
-          groupId = context.type === "group" ? context.groupId : "unknown";
-          console.log("Group ID:", groupId);  // ตรวจสอบว่า groupId ถูกดึงมาอย่างถูกต้องหรือไม่
-          return liff.getProfile();
+
+          // ตรวจสอบว่า context เป็นกลุ่มหรือไม่
+          if (context.type === "group") {
+            groupId = context.groupId;
+            console.log("Group ID:", groupId);  // ตรวจสอบว่า groupId ถูกดึงมาอย่างถูกต้องหรือไม่
+          } else {
+            groupId = "unknown";  // ถ้าไม่อยู่ในกลุ่ม
+            console.log("ไม่อยู่ในกลุ่ม LINE, groupId เป็น unknown");
+          }
+          return liff.getProfile();  // ดึงข้อมูลโปรไฟล์ของผู้ใช้
         }
       })
       .then(profile => {
-        if (profile) userId = profile.userId;
-        loadSeats();
+        if (profile) userId = profile.userId;  // ถ้าสำเร็จ ให้บันทึก userId
+        loadSeats();  // โหลดที่นั่ง
       })
       .catch(err => {
         Swal.fire("LIFF Error", err.message, "error");
@@ -137,12 +146,8 @@
       });
     }
 
+    // ฟังก์ชันโหลดที่นั่งจากเซิร์ฟเวอร์
     async function loadSeats() {
-      if (groupId === "unknown") {
-        Swal.fire("เกิดข้อผิดพลาด", "⛔ กรุณาเปิดจากกลุ่ม LINE เพื่อทำการจองที่นั่ง", "error");
-        return;
-      }
-
       try {
         const res = await fetch(`${seatsURL}?groupId=${groupId}`);
         const data = await res.json();
@@ -160,6 +165,7 @@
       }
     }
 
+    // จัดการการเลือกที่นั่ง
     seatButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         if (!btn.classList.contains('taken')) {
@@ -168,6 +174,7 @@
       });
     });
 
+    // ฟังก์ชันยืนยันการจอง
     async function confirmBooking() {
       if (!userId) {
         Swal.fire("เกิดข้อผิดพลาด", "⛔ ไม่สามารถดึง userId ได้ กรุณาเปิดจาก LINE อีกครั้ง", "error");
