@@ -30,22 +30,10 @@ function sanitizeSheetName(name, fallbackId) {
   return (safeName + suffix).slice(0, 100);
 }
 
-// --- ดึงชื่อกลุ่ม หรือ fallback เป็น groupId ---
-async function getSheetNameFromGroup(groupId) {
-  try {
-    console.log('📥 กำลังดึงชื่อกลุ่มจาก groupId:', groupId);
-    const summary = await client.getGroupSummary(groupId);
-    console.log('✅ groupName ที่ได้:', summary.groupName);
-    return sanitizeSheetName(summary.groupName, groupId);
-  } catch (err) {
-    console.warn('⚠️ ดึงชื่อกลุ่มไม่ได้ ใช้ groupId แทน:', err.message);
-    return groupId;
-  }
-}
-
 // --- ตรวจสอบ/สร้างชีต ---
-async function ensureSheetExists(sheetName) {
+async function ensureSheetExists() {
   const metadata = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+  const sheetName = "seats"; // ใช้ชื่อชีตเดียวสำหรับเก็บข้อมูลทั้งหมด
   const exists = metadata.data.sheets.some(sheet => sheet.properties.title === sheetName);
   if (!exists) {
     await sheets.spreadsheets.batchUpdate({
@@ -56,11 +44,6 @@ async function ensureSheetExists(sheetName) {
     });
   }
 }
-
-// --- Root Route ---
-app.get('/', (req, res) => {
-  res.send('🌳 Forest Bot is running!');
-});
 
 // --- LINE Webhook ---
 app.post('/webhook', (req, res, next) => {
@@ -122,16 +105,19 @@ app.post('/reserve', express.json(), async (req, res) => {
   }
 
   try {
-    const sheetName = await getSheetNameFromGroup(groupId);
-    await ensureSheetExists(sheetName);
-    const timestamp = new Date().toISOString();
+    const sheetName = "seats"; // ใช้ชื่อชีตเดียว
+    await ensureSheetExists();
 
+    const timestamp = new Date().toISOString();
+    const row = [timestamp, groupId, userId, seatNumber, name]; // เพิ่มข้อมูล groupId ลงไปด้วย
+
+    // เพิ่มข้อมูลใหม่ลงในชีต
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${sheetName}!A1`,
+      range: `${sheetName}!A1`,  // เพิ่มข้อมูลในชีตเดียว
       valueInputOption: 'USER_ENTERED',
       requestBody: {
-        values: [[timestamp, userId, seatNumber, name]],
+        values: [row],
       },
     });
 
@@ -148,20 +134,21 @@ app.get('/seats', async (req, res) => {
   if (!groupId) return res.status(400).json({ message: '❌ groupId is required' });
 
   try {
-    const sheetName = await getSheetNameFromGroup(groupId);
-    await ensureSheetExists(sheetName);
+    const sheetName = "seats"; // ใช้ชื่อชีตเดียว
+    await ensureSheetExists();
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${sheetName}!A:D`,
+      range: `${sheetName}!A:E`,  // ดึงข้อมูลทั้งหมดในชีต
     });
 
     const rows = response.data.values || [];
-    const seats = rows.map(row => ({
+    const seats = rows.filter(row => row[1] === groupId).map(row => ({  // กรองข้อมูลตาม groupId
       timestamp: row[0],
-      userId: row[1],
-      seatNumber: row[2],
-      name: row[3],
+      groupId: row[1],
+      userId: row[2],
+      seatNumber: row[3],
+      name: row[4],
     }));
 
     res.json({ status: 'success', seats });
